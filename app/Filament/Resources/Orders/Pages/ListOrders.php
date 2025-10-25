@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\Orders\Pages;
 
 use App\Filament\Resources\Orders\OrderResource;
-use Filament\Actions\CreateAction;
+use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
+use App\Filament\Imports\OrderImporter;
+use Filament\Support\Icons\Heroicon;
 
 class ListOrders extends ListRecords
 {
@@ -13,7 +15,10 @@ class ListOrders extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            ImportAction::make()
+                ->label('匯入訂單')
+                ->icon(Heroicon::ArrowUpTray)
+                ->importer(OrderImporter::class),
         ];
     }
 }
