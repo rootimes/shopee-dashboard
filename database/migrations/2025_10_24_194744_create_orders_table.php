@@ -38,8 +38,8 @@ return new class extends Migration
             $table->dateTime('buyer_payment_time')->nullable()->index()->comment('買家付款時間');
             $table->dateTime('actual_shipment_time')->nullable()->index()->comment('實際出貨時間');
             $table->dateTime('completed_time')->nullable()->index()->comment('訂單完成時間');
-            $table->json('buyer_note')->nullable()->comment('買家備註');
-            $table->json('note')->nullable()->comment('備註');
+            $table->string('buyer_note')->nullable()->comment('買家備註');
+            $table->string('note')->nullable()->comment('備註');
             $table->timestamps();
         });
     }

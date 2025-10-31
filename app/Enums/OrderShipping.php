@@ -20,10 +20,11 @@ enum OrderShipping: int
             self::SEVELEN_ELEVEN => '7-ELEVEN',
             self::FAMILY_MART => '全家',
             self::OK_MART => 'OK Mart',
-            self::HI_LIFE_ECONOMY => '萊爾富經濟包',
+            self::HI_LIFE_ECONOMY => '萊爾富-經濟包',
             self::HI_LIFE => '萊爾富',
             self::POST_OFFICE => '中華郵政',
-            self::HOME_DELIVERY_STANDARD => '店到家宅配 - 標準包裹',
+            self::HOME_DELIVERY_STANDARD => '店到家宅配-標準包裹',
+            default => '未匹配',
         };
     }
 
@@ -34,7 +35,7 @@ enum OrderShipping: int
             '7-ELEVEN' => self::SEVELEN_ELEVEN,
             '全家' => self::FAMILY_MART,
             'OK Mart' => self::OK_MART,
-            '萊爾富經濟包' => self::HI_LIFE_ECONOMY,
+            '萊爾富-經濟包' => self::HI_LIFE_ECONOMY,
             '萊爾富' => self::HI_LIFE,
             '中華郵政' => self::POST_OFFICE,
             '店到家宅配 - 標準包裹' => self::HOME_DELIVERY_STANDARD,

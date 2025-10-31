@@ -22,11 +22,14 @@ class OrderImporter extends Importer
         return [
             ImportColumn::make('id')->label('訂單編號')->requiredMapping()->guess(['訂單編號']),
             ImportColumn::make('status')->label('訂單狀態')->requiredMapping()->guess(['訂單狀態'])
-                ->castStateUsing(function (?string $state): OrderStatus {
+                ->castStateUsing(function (?string $state): ?OrderStatus {
                     return OrderStatus::fromLabel($state);
                 }),
             ImportColumn::make('failure_reason')->label('不成立原因')->guess(['不成立原因']),
-            ImportColumn::make('ordered_at')->label('訂單成立日期')->requiredMapping()->guess(['訂單成立日期']),
+            ImportColumn::make('ordered_at')->label('訂單成立日期')->requiredMapping()->guess(['訂單成立日期'])
+                ->castStateUsing(function (?string $state): ?string {
+                    return $state === '-' ? null : $state;
+                }),
             ImportColumn::make('total_price')->label('商品總價')->requiredMapping()->guess(['商品總價']),
             ImportColumn::make('buyer_shipping_fee')->label('買家支付運費')->requiredMapping()->guess(['買家支付運費']),
             ImportColumn::make('shopee_shipping_fee')->label('蝦皮補助運費')->requiredMapping()->guess(['蝦皮補助運費']),
@@ -45,16 +48,25 @@ class OrderImporter extends Importer
             ImportColumn::make('city')->label('城市')->requiredMapping()->guess(['城市']),
             ImportColumn::make('district')->label('行政區')->requiredMapping()->guess(['行政區']),
             ImportColumn::make('shipping_option')->label('寄送方式')->requiredMapping()->guess(['寄送方式'])
-                ->castStateUsing(function (?string $state): OrderShipping {
+                ->castStateUsing(function (?string $state): ?OrderShipping {
                     return OrderShipping::fromLabel($state);
                 }),
             ImportColumn::make('payment_method')->label('付款方式')->requiredMapping()->guess(['付款方式'])
-                ->castStateUsing(function (?string $state): OrderPayment {
+                ->castStateUsing(function (?string $state): ?OrderPayment {
                     return OrderPayment::fromLabel($state);
                 }),
-            ImportColumn::make('buyer_payment_time')->label('買家付款時間')->requiredMapping()->guess(['買家付款時間']),
-            ImportColumn::make('actual_shipment_time')->label('實際出貨時間')->requiredMapping()->guess(['實際出貨時間']),
-            ImportColumn::make('completed_time')->label('訂單完成時間')->requiredMapping()->guess(['訂單完成時間']),
+            ImportColumn::make('buyer_payment_time')->label('買家付款時間')->requiredMapping()->guess(['買家付款時間'])
+                ->castStateUsing(function (?string $state): ?string {
+                    return $state === '-' ? null : $state;
+                }),
+            ImportColumn::make('actual_shipment_time')->label('實際出貨時間')->requiredMapping()->guess(['實際出貨時間'])
+                ->castStateUsing(function (?string $state): ?string {
+                    return $state === '-' ? null : $state;
+                }),
+            ImportColumn::make('completed_time')->label('訂單完成時間')->requiredMapping()->guess(['訂單完成時間'])
+                ->castStateUsing(function (?string $state): ?string {
+                    return $state === '-' ? null : $state;
+                }),
             ImportColumn::make('buyer_note')->label('買家備註')->guess(['買家備註']),
             ImportColumn::make('note')->label('備註')->guess(['備註']),
         ];

@@ -14,6 +14,7 @@ enum OrderPayment: int
             self::CREDIT_CARD => '信用卡',
             self::SHOPEE_PAY_LATER => '蝦皮晚點付',
             self::CASH_ON_DELIVERY => '貨到付款',
+            default => '未匹配',
         };
     }
 

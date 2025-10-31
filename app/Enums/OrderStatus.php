@@ -20,6 +20,7 @@ enum OrderStatus: int
             self::REVIEW => '鑑賞期',
             self::COMPLETED => '已完成',
             self::CANCELED => '不成立',
+            default => '未匹配',
         };
     }
 
