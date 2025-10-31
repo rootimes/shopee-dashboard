@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     public $incrementing = false;
+    
     protected $keyType = 'string';
 
     protected $casts = [
+        'status' => \App\Enums\OrderStatus::class,
         'note' => 'array',
         'ordered_at' => 'datetime',
         'buyer_payment_time' => 'datetime',

@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Enums;
+
+enum OrderStatus: int
+{
+    case PENDING = 1;
+    case TRANSIT = 2;
+    case DELIVERED = 3;
+    case REVIEW = 4;
+    case COMPLETED = 5;
+    case CANCELED = 6;
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::PENDING => '待出貨',
+            self::TRANSIT => '運送中',
+            self::DELIVERED => '已送達',
+            self::REVIEW => '鑑賞期',
+            self::COMPLETED => '已完成',
+            self::CANCELED => '不成立',
+        };
+    }
+
+    public static function fromLabel(string $label): ?self
+    {
+        return match ($label) {
+            '待出貨' => self::PENDING,
+            '運送中' => self::TRANSIT,
+            '已送達' => self::DELIVERED,
+            '已完成' => self::COMPLETED,
+            '不成立' => self::CANCELED,
+            default => $label.contains('鑑賞期') ? self::REVIEW : null,
+        };
+    }
+}
