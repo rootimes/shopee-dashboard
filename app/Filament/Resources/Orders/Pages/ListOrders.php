@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Orders\Pages;
 
+use App\Filament\Imports\OrderImporter;
 use App\Filament\Resources\Orders\OrderResource;
 use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
-use App\Filament\Imports\OrderImporter;
 use Filament\Support\Icons\Heroicon;
 
 class ListOrders extends ListRecords
