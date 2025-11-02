@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
-use Filament\Schemas\Schema;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Schema;
 
 class OrderInfolist
 {
@@ -17,7 +17,7 @@ class OrderInfolist
                     ->schema([
                         TextEntry::make('id')->label('訂單編號'),
                         TextEntry::make('status')->label('訂單狀態')
-                            ->formatStateUsing(fn($state) => $state?->label()),
+                            ->formatStateUsing(fn ($state) => $state?->label()),
                         TextEntry::make('failure_reason')->label('不成立原因'),
                         TextEntry::make('ordered_at')->label('訂單成立日期')
                             ->dateTime(),
@@ -82,10 +82,10 @@ class OrderInfolist
                 Section::make('付款與物流資訊')
                     ->schema([
                         TextEntry::make('payment_method')->label('付款方式')
-                            ->formatStateUsing(fn($state) => $state?->label()),
+                            ->formatStateUsing(fn ($state) => $state?->label()),
                         TextEntry::make('installment_plan')->label('分期付款期數'),
                         TextEntry::make('shipping_option')->label('寄送方式')
-                            ->formatStateUsing(fn($state) => $state?->label()),
+                            ->formatStateUsing(fn ($state) => $state?->label()),
                         TextEntry::make('city')->label('城市'),
                         TextEntry::make('district')->label('行政區'),
                     ]),

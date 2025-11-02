@@ -52,9 +52,7 @@ class OrdersTable
                 TextColumn::make('buyer_note')->label('買家備註')->searchable()->limit(50),
                 TextColumn::make('note')->label('備註')->searchable()->limit(50),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->recordActions([
                 ViewAction::make(),
             ])
