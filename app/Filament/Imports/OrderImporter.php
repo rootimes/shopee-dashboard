@@ -69,6 +69,10 @@ class OrderImporter extends Importer
                 }),
             ImportColumn::make('buyer_note')->label('買家備註')->guess(['買家備註']),
             ImportColumn::make('note')->label('備註')->guess(['備註']),
+
+            // product profits
+
+
         ];
     }
 
@@ -81,10 +85,10 @@ class OrderImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your order import has completed and '.Number::format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
+        $body = 'Your order import has completed and ' . Number::format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' '.Number::format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
+            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
         }
 
         return $body;
