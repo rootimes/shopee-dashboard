@@ -20,7 +20,7 @@ class OrderImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('id')->label('訂單編號')->requiredMapping()->guess(['訂單編號']),
+            ImportColumn::make('id')->label('訂單編號')->requiredMappingForNewRecordsOnly()->guess(['訂單編號']),
             ImportColumn::make('status')->label('訂單狀態')->requiredMapping()->guess(['訂單狀態'])
                 ->castStateUsing(function (?string $state): ?OrderStatus {
                     return OrderStatus::fromLabel($state);
@@ -70,25 +70,22 @@ class OrderImporter extends Importer
             ImportColumn::make('buyer_note')->label('買家備註')->guess(['買家備註']),
             ImportColumn::make('note')->label('備註')->guess(['備註']),
 
-            // product profits
-
-
         ];
     }
 
     public function resolveRecord(): Order
     {
-        $existing = Order::query()->where('id', $this->data['id'])->first();
-
-        return $existing ?? new Order;
+        return Order::firstOrNew([
+            'id' => $this->data['id'],
+        ]);
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your order import has completed and ' . Number::format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your order import has completed and '.Number::format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.Number::format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         return $body;
