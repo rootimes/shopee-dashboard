@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
@@ -13,10 +13,10 @@ class Product extends Model
 
     protected $guarded = [];
 
-    protected function name(): Attribute
+    protected function displayName(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value ?? $this->shopee_name ?? '未命名商品',
+            get: fn () => $this->name ?? $this->shopee_name ?? '未命名商品',
         );
     }
 
@@ -27,15 +27,15 @@ class Product extends Model
                 if ($this->cost_price_rmb === null) {
                     return null;
                 }
-                
+
                 $setting = Setting::first();
-                
-                if ($setting->rmb_to_cny_rate) {
+
+                if ($setting?->rmb_to_cny_rate) {
                     $rate = $setting->rmb_to_cny_rate;
                 } else {
                     return null;
                 }
-                
+
                 return number_format($this->cost_price_rmb * $rate, 2);
             }
         );
