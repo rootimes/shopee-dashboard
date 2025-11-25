@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\Products\Pages;
 
+use App\Filament\Imports\ProductImporter;
 use App\Filament\Resources\Products\ProductResource;
 use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
 use Filament\Actions\ImportAction;
+use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
-use App\Filament\Imports\ProductImporter;
 
 class ListProducts extends ListRecords
 {

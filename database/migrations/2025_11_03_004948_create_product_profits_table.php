@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedInteger('sales_price')->nullable()->comment('商品活動價格');
             $table->unsignedInteger('quantity')->nullable()->comment('數量');
             $table->timestamps();
-            
+
             $table->primary(['product_id', 'order_id']);
             $table->foreign('order_id')->references('id')->on('orders')->cascadeOnDelete();
         });
