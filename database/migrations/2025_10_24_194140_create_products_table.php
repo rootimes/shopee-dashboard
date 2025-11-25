@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name')->nullable()->comment('商品名稱');
             $table->string('shopee_name')->nullable()->comment('蝦皮商品規格名稱');
             $table->string('image_url')->nullable()->comment('商品圖片網址');
-            $table->decimal('cost_price', 10, 2)->nullable()->comment('人民幣成本價');
+            $table->decimal('cost_price_rmb', 10, 2)->nullable()->comment('人民幣成本價');
             $table->unsignedInteger('stock')->nullable()->comment('庫存數量');
             $table->timestamps();
         });

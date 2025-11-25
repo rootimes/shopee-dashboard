@@ -6,7 +6,9 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
 
 class ProductsTable
 {
@@ -14,7 +16,13 @@ class ProductsTable
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('id')->label('商品選項貨號')->sortable()->searchable(),
+                ImageColumn::make('image_url')->label('商品圖片'),
+                TextColumn::make('name')->label('規格名稱')->sortable()->searchable()->limit(50),
+                TextColumn::make('stock')->label('庫存數量')->sortable(),
+                TextColumn::make('cost_price')->label('成本價')->sortable()->money('CNY'),
+                TextColumn::make('created_at')->label('建立時間')->sortable()->dateTime(),
+                TextColumn::make('updated_at')->label('最後更新時間')->sortable()->dateTime(),
             ])
             ->filters([
                 //
