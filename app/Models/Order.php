@@ -10,6 +10,8 @@ class Order extends Model
 
     protected $keyType = 'string';
 
+    protected $guarded = [];
+
     protected $casts = [
         'status' => \App\Enums\OrderStatus::class,
         'shipping_option' => \App\Enums\OrderShipping::class,

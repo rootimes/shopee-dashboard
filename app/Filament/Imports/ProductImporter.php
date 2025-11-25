@@ -15,14 +15,20 @@ class ProductImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            //
+            ImportColumn::make('id')->label('商品選項貨號')->requiredMappingForNewRecordsOnly()->guess(['商品選項貨號']),
+            ImportColumn::make('shopee_name')->label('蝦皮商品規格名稱')->requiredMapping()->guess(['商品規格名稱']),
+            ImportColumn::make('stock')->label('庫存數量')->requiredMapping()->guess(['庫存']),
         ];
     }
 
-    public function resolveRecord(): Product
+    public function resolveRecord(): ?Product
     {
+        if (blank($this->data['id'])) {
+            return null;
+        }
+        
         return Product::firstOrNew([
-            'Id' => $this->data['Id'],
+            'id' => $this->data['id'],
         ]);
     }
 

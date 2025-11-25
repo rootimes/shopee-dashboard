@@ -15,8 +15,6 @@ class OrderImporter extends Importer
 {
     protected static ?string $model = Order::class;
 
-    protected array $processedIds = [];
-
     public static function getColumns(): array
     {
         return [
