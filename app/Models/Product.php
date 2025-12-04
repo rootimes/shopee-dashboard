@@ -30,8 +30,8 @@ class Product extends Model
 
                 $setting = Setting::first();
 
-                if ($setting?->rmb_to_cny_rate) {
-                    $rate = $setting->rmb_to_cny_rate;
+                if ($setting?->rmb_to_twd_rate) {
+                    $rate = $setting->rmb_to_twd_rate;
                 } else {
                     return null;
                 }
