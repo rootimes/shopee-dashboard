@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->decimal('rmb_to_twd_rate', 10, 4)->comment('人民幣兌新台幣匯率');
+            $table->string('key')->unique();
+            $table->string('value')->nullable();
             $table->timestamps();
         });
     }
