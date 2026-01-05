@@ -28,10 +28,10 @@ class Product extends Model
                     return null;
                 }
 
-                $setting = Setting::first();
+                $rmbToTwdRateSetting = Setting::where('key', 'rmb_to_twd_rate')->first();
 
-                if ($setting?->rmb_to_twd_rate) {
-                    $rate = $setting->rmb_to_twd_rate;
+                if ($rmbToTwdRateSetting?->value) {
+                    $rate = $rmbToTwdRateSetting->value;
                 } else {
                     return null;
                 }

@@ -19,7 +19,8 @@ class ProductsTable
                 ImageColumn::make('image_url')->label('商品圖片'),
                 TextColumn::make('display_name')->label('規格名稱')->sortable()->searchable()->limit(50),
                 TextColumn::make('stock')->label('庫存數量')->sortable(),
-                TextColumn::make('cost_price')->label('成本價')->sortable()->money('CNY'),
+                TextColumn::make('cost_price')->label('成本價 (台幣)'),
+                TextColumn::make('cost_price_rmb')->label('成本價 (人民幣)')->sortable(),
                 TextColumn::make('created_at')->label('建立時間')->sortable()->dateTime(),
                 TextColumn::make('updated_at')->label('最後更新時間')->sortable()->dateTime(),
             ])
