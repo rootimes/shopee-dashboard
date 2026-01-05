@@ -21,6 +21,8 @@ class OrderResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'Order';
 
+    protected static ?int $navigationSort = 2;
+
     public static function infolist(Schema $schema): Schema
     {
         return OrderInfolist::configure($schema);
