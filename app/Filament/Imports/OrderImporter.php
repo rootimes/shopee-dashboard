@@ -6,10 +6,12 @@ use App\Enums\OrderPayment;
 use App\Enums\OrderShipping;
 use App\Enums\OrderStatus;
 use App\Models\Order;
+use App\Models\Product;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Number;
+use Filament\Notifications\Notification;
 
 class OrderImporter extends Importer
 {
@@ -37,7 +39,7 @@ class OrderImporter extends Importer
             ImportColumn::make('shopee_coin_deduction')->label('蝦皮幣抵扣')->requiredMapping()->guess(['蝦幣折抵']),
             ImportColumn::make('credit_card_promotion_discount')->label('銀行信用卡活動折抵')->requiredMapping()->guess(['銀行信用卡活動折抵']),
             ImportColumn::make('shop_voucher_discount')->label('賣場優惠券')->requiredMapping()->guess(['賣場優惠券']),
-            ImportColumn::make('shop_coin_deduction')->label('賣家蝦幣回饋券')->requiredMapping()->guess(['賣家蝦幣回饋券']),
+            ImportColumn::make('shop_shopee_coin_return')->label('賣家蝦幣回饋券')->requiredMapping()->guess(['賣家蝦幣回饋券']),
             ImportColumn::make('voucher')->label('優惠券')->requiredMapping()->guess(['優惠券']),
             ImportColumn::make('transaction_fee')->label('成交手續費')->requiredMapping()->guess(['成交手續費']),
             ImportColumn::make('other_service_fee')->label('其他服務費')->requiredMapping()->guess(['其他服務費']),
@@ -68,6 +70,11 @@ class OrderImporter extends Importer
             ImportColumn::make('buyer_note')->label('買家備註')->guess(['買家備註']),
             ImportColumn::make('note')->label('備註')->guess(['備註']),
 
+            // product info
+
+            ImportColumn::make('product_id')->label('商品選項貨號')->requiredMapping()->guess(['商品選項貨號'])->fillRecordUsing(fn() => []),
+            ImportColumn::make('quantity')->label('數量')->requiredMapping()->guess(['數量'])->fillRecordUsing(fn() => []),
+            ImportColumn::make('sales_price')->label('商品活動價格')->requiredMapping()->guess(['商品活動價格'])->fillRecordUsing(fn() => []),
         ];
     }
 
@@ -80,12 +87,63 @@ class OrderImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your order import has completed and '.Number::format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
+        $body = 'Your order import has completed and ' . Number::format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' '.Number::format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
+            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
         }
 
         return $body;
+    }
+
+    protected function afterSave(): void
+    {
+        $totalProductSalesPrice = $this->data['sales_price'] * $this->data['quantity'];
+
+        $productOrderRate = $totalProductSalesPrice / $this->data['buyer_total_payment'];
+
+        $product = Product::find($this->data['product_id']);
+
+        $productCostPrice = $product ? $product->cost_price : 0;
+
+        $platformFee = ($this->data['transaction_fee']
+            + $this->data['other_service_fee']
+            + $this->data['payment_processing_fee']) * $productOrderRate;
+
+        $discountAmount = ($this->data['shopee_coin_deduction']
+            + $this->data['credit_card_promotion_discount']
+            + $this->data['shop_voucher_discount']
+            + $this->data['shop_shopee_coin_return']
+            + $this->data['voucher']) * $productOrderRate;
+
+        $totalProfit = ($this->data['sales_price'] - $productCostPrice) * $this->data['quantity']
+            - $platformFee
+            - $discountAmount;
+
+        try {
+            $this->record->profits()->updateOrCreate(
+                [
+                    'order_id' => $this->record->id,
+                    'product_id' => $this->data['product_id'],
+                ],
+                [
+                    'display_name' => $product ? $product->display_name : '未命名商品',
+                    'sales_price' => $this->data['sales_price'],
+                    'quantity' => $this->data['quantity'],
+                    'order_completed_time' => $this->data['completed_time'],
+                    'platform_fee' => $platformFee,
+                    'discount_amount' => $discountAmount,
+                    'cost_price' => $productCostPrice,
+                    'total_profit' => $totalProfit,
+                ],
+            );
+        } catch (\Throwable $e) {
+            Notification::make()
+                ->title('Error saving product profit for order ID ' . $this->data['id'] . ': ' . $e->getMessage())
+                ->danger()
+                ->send();
+
+            throw $e;
+        }
     }
 }

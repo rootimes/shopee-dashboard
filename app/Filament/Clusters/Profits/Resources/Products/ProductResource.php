@@ -7,7 +7,7 @@ use App\Filament\Clusters\Profits\Resources\Products\Pages\ListProducts;
 use App\Filament\Clusters\Profits\Resources\Products\Pages\ViewProduct;
 use App\Filament\Clusters\Profits\Resources\Products\Schemas\ProductInfolist;
 use App\Filament\Clusters\Profits\Resources\Products\Tables\ProductsTable;
-use App\Models\Product;
+use App\Models\ProductProfit;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -16,7 +16,7 @@ use Filament\Tables\Table;
 
 class ProductResource extends Resource
 {
-    protected static ?string $model = Product::class;
+    protected static ?string $model = ProductProfit::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

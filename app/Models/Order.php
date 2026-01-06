@@ -22,4 +22,9 @@ class Order extends Model
         'actual_shipment_time' => 'datetime',
         'completed_time' => 'datetime',
     ];
+
+    public function profits()
+    {
+        return $this->hasMany(ProductProfit::class, 'order_id', 'id');
+    }
 }

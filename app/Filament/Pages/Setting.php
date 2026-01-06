@@ -4,14 +4,14 @@ namespace App\Filament\Pages;
 
 use App\Models\Setting as SettingModel;
 use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
-use Filament\Support\Icons\Heroicon;
-use Filament\Actions\Action;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
-use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
 
 class Setting extends Page implements HasSchemas
