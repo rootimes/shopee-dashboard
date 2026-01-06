@@ -99,12 +99,16 @@ class OrderImporter extends Importer
     protected function afterSave(): void
     {
         if ($this->shouldSkipRow()) {
+            Notification::make()
+                ->title('Skipping order ID ' . $this->data['id'])
+                ->info()
+                ->send();
             return;
         }
 
-        $productOrderRate = $this->data['total_price'] / $this->data['buyer_total_payment'];
-
         $product = Product::find($this->data['product_id']);
+
+        $productOrderRate = $this->data['sales_price'] * $this->data['quantity'] / $this->data['total_price'];
 
         $productCostPrice = $product ? $product->cost_price : 0;
 
@@ -151,7 +155,10 @@ class OrderImporter extends Importer
 
     private function shouldSkipRow(): bool
     {
-        if ($this->data['total_price'] === 0) {
+        if (
+            $this->data['status'] !== OrderStatus::COMPLETED ||
+            $this->data['status'] !== OrderStatus::REVIEW
+        ) {
             return true;
         }
         return false;

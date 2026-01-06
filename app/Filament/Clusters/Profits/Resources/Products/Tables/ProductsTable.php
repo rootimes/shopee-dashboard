@@ -22,10 +22,10 @@ class ProductsTable
                 TextColumn::make('quantity')->label('銷售數量'),
                 TextColumn::make('total_sales_price')->label('總銷售價格')->getStateUsing(fn($record) => $record->sales_price * $record->quantity),
                 TextColumn::make('platform_fee')->summarize(Sum::make()->label('總手續費'))->label('平台手續費'),
-                TextColumn::make('discount_amount')->label('折扣金額'),
-                TextColumn::make('cost_price')->label('商品成本價格'),
+                TextColumn::make('discount_amount')->sortable()->label('折扣金額'),
+                TextColumn::make('cost_price')->sortable()->label('商品成本價格'),
                 TextColumn::make('total_profit')->sortable()->summarize(Sum::make()->label('總利潤'))->label('利潤'),
-                TextColumn::make('order_completed_time')->label('訂單完成時間')->sortable()->dateTime(),
+                TextColumn::make('order_completed_time')->sortable()->label('訂單完成時間')->dateTime(),
             ])
             ->filters([
                 Filter::make('order_completed_time_range')
