@@ -12,13 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('product_profits', function (Blueprint $table) {
+            $table->id();
             $table->string('product_id')->index()->comment('商品編號');
             $table->string('order_id')->comment('訂單編號');
+            $table->string('display_name')->nullable()->comment('商品顯示名稱');
             $table->unsignedInteger('sales_price')->nullable()->comment('商品活動價格');
             $table->unsignedInteger('quantity')->nullable()->comment('數量');
+            $table->unsignedInteger('cost_price')->nullable()->comment('商品成本價格');
+            $table->unsignedInteger('platform_fee')->nullable()->comment('平台手續費');
+            $table->unsignedInteger('discount_amount')->nullable()->comment('折扣金額');
+            $table->dateTime('order_completed_time')->nullable()->index()->comment('訂單完成時間');
+            $table->unsignedInteger('total_profit')->nullable()->comment('總利潤');
+
             $table->timestamps();
 
-            $table->primary(['product_id', 'order_id']);
+            $table->unique(['product_id', 'order_id']);
             $table->foreign('order_id')->references('id')->on('orders')->cascadeOnDelete();
         });
     }

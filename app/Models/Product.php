@@ -24,8 +24,8 @@ class Product extends Model
     {
         return Attribute::make(
             get: function () {
-                if ($this->cost_price_rmb === null) {
-                    return null;
+                if (is_null($this->cost_price_rmb)) {
+                    return 0;
                 }
 
                 $rmbToTwdRateSetting = Setting::where('key', 'rmb_to_twd_rate')->first();
@@ -33,7 +33,7 @@ class Product extends Model
                 if ($rmbToTwdRateSetting?->value) {
                     $rate = $rmbToTwdRateSetting->value;
                 } else {
-                    return null;
+                    return 0;
                 }
 
                 return number_format($this->cost_price_rmb * $rate, 2);

@@ -59,7 +59,7 @@ class OrderInfolist
                                     ->money('TWD'),
                                 TextEntry::make('shop_voucher_discount')->label('賣場優惠券')
                                     ->money('TWD'),
-                                TextEntry::make('shop_coin_deduction')->label('賣家蝦幣回饋券')
+                                TextEntry::make('shop_shopee_coin_return')->label('賣家蝦幣回饋券')
                                     ->money('TWD'),
                                 TextEntry::make('voucher')->label('優惠券')
                                     ->money('TWD'),
