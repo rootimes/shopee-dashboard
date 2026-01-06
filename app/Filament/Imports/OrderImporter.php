@@ -98,9 +98,11 @@ class OrderImporter extends Importer
 
     protected function afterSave(): void
     {
-        $totalProductSalesPrice = $this->data['sales_price'] * $this->data['quantity'];
+        if ($this->shouldSkipRow()) {
+            return;
+        }
 
-        $productOrderRate = $totalProductSalesPrice / $this->data['buyer_total_payment'];
+        $productOrderRate = $this->data['total_price'] / $this->data['buyer_total_payment'];
 
         $product = Product::find($this->data['product_id']);
 
@@ -145,5 +147,13 @@ class OrderImporter extends Importer
 
             throw $e;
         }
+    }
+
+    private function shouldSkipRow(): bool
+    {
+        if ($this->data['total_price'] === 0) {
+            return true;
+        }
+        return false;
     }
 }

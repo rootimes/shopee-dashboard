@@ -16,15 +16,15 @@ class ProductsTable
     {
         return $table
             ->columns([
-                TextColumn::make('order_id')->label('訂單編號'),
-                TextColumn::make('display_name')->label('商品名稱'),
+                TextColumn::make('order_id')->copyable()->searchable()->sortable()->label('訂單編號'),
+                TextColumn::make('display_name')->searchable()->label('商品名稱'),
                 TextColumn::make('sales_price')->label('銷售價格'),
                 TextColumn::make('quantity')->label('銷售數量'),
                 TextColumn::make('total_sales_price')->label('總銷售價格')->getStateUsing(fn($record) => $record->sales_price * $record->quantity),
-                TextColumn::make('platform_fee')->label('平台手續費')->summarize(Sum::make()->label('總手續費')),
+                TextColumn::make('platform_fee')->summarize(Sum::make()->label('總手續費'))->label('平台手續費'),
                 TextColumn::make('discount_amount')->label('折扣金額'),
                 TextColumn::make('cost_price')->label('商品成本價格'),
-                TextColumn::make('total_profit')->label('利潤')->sortable()->summarize(Sum::make()->label('總利潤')),
+                TextColumn::make('total_profit')->sortable()->summarize(Sum::make()->label('總利潤'))->label('利潤'),
                 TextColumn::make('order_completed_time')->label('訂單完成時間')->sortable()->dateTime(),
             ])
             ->filters([

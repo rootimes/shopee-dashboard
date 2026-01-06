@@ -18,11 +18,11 @@ return new class extends Migration
             $table->string('display_name')->nullable()->comment('商品顯示名稱');
             $table->unsignedInteger('sales_price')->nullable()->comment('商品活動價格');
             $table->unsignedInteger('quantity')->nullable()->comment('數量');
-            $table->unsignedInteger('cost_price')->nullable()->comment('商品成本價格');
-            $table->unsignedInteger('platform_fee')->nullable()->comment('平台手續費');
-            $table->unsignedInteger('discount_amount')->nullable()->comment('折扣金額');
+            $table->decimal('cost_price', 10, 2)->nullable()->comment('商品成本價格');
+            $table->decimal('platform_fee', 10, 2)->nullable()->comment('平台手續費');
+            $table->decimal('discount_amount', 10, 2)->nullable()->comment('折扣金額');
             $table->dateTime('order_completed_time')->nullable()->index()->comment('訂單完成時間');
-            $table->unsignedInteger('total_profit')->nullable()->comment('總利潤');
+            $table->decimal('total_profit', 10, 2)->nullable()->comment('總利潤');
 
             $table->timestamps();
 
