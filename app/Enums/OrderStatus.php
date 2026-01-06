@@ -32,7 +32,7 @@ enum OrderStatus: int
             '已送達' => self::DELIVERED,
             '已完成' => self::COMPLETED,
             '不成立' => self::CANCELED,
-            default => $label.contains('鑑賞期') ? self::REVIEW : null,
+            default => str_contains($label, '鑑賞期') ? self::REVIEW : null,
         };
     }
 }
