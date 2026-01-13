@@ -10,5 +10,5 @@ class ProfitsCluster extends Cluster
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 }
