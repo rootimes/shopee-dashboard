@@ -10,8 +10,8 @@ use App\Models\Product;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Support\Number;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Number;
 
 class OrderImporter extends Importer
 {
@@ -72,9 +72,9 @@ class OrderImporter extends Importer
 
             // product info
 
-            ImportColumn::make('product_id')->label('商品選項貨號')->requiredMapping()->guess(['商品選項貨號'])->fillRecordUsing(fn() => []),
-            ImportColumn::make('quantity')->label('數量')->requiredMapping()->guess(['數量'])->fillRecordUsing(fn() => []),
-            ImportColumn::make('sales_price')->label('商品活動價格')->requiredMapping()->guess(['商品活動價格'])->fillRecordUsing(fn() => []),
+            ImportColumn::make('product_id')->label('商品選項貨號')->requiredMapping()->guess(['商品選項貨號'])->fillRecordUsing(fn () => []),
+            ImportColumn::make('quantity')->label('數量')->requiredMapping()->guess(['數量'])->fillRecordUsing(fn () => []),
+            ImportColumn::make('sales_price')->label('商品活動價格')->requiredMapping()->guess(['商品活動價格'])->fillRecordUsing(fn () => []),
         ];
     }
 
@@ -87,10 +87,10 @@ class OrderImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your order import has completed and ' . Number::format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your order import has completed and '.Number::format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.Number::format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         return $body;
@@ -100,9 +100,10 @@ class OrderImporter extends Importer
     {
         if ($this->shouldSkipRow()) {
             Notification::make()
-                ->title('Skipping order ID ' . $this->data['id'])
+                ->title('Skipping order ID '.$this->data['id'])
                 ->info()
                 ->send();
+
             return;
         }
 
@@ -145,7 +146,7 @@ class OrderImporter extends Importer
             );
         } catch (\Throwable $e) {
             Notification::make()
-                ->title('Error saving product profit for order ID ' . $this->data['id'] . ': ' . $e->getMessage())
+                ->title('Error saving product profit for order ID '.$this->data['id'].': '.$e->getMessage())
                 ->danger()
                 ->send();
 
@@ -161,6 +162,7 @@ class OrderImporter extends Importer
         ) {
             return true;
         }
+
         return false;
     }
 }

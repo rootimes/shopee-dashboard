@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Costs\Schemas;
 
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class CostForm
@@ -29,7 +29,7 @@ class CostForm
                     ->date(),
                 Textarea::make('description')
                     ->rows(3)
-                    ->label('描述')
+                    ->label('描述'),
             ]);
     }
 }

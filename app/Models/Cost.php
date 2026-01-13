@@ -11,6 +11,4 @@ class Cost extends Model
     protected $casts = [
         'incurred_time' => 'datetime',
     ];
-
-
 }

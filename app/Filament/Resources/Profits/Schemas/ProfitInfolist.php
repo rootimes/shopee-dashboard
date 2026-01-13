@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Clusters\Profits\Resources\Products\Schemas;
+namespace App\Filament\Resources\Profits\Schemas;
 
 use Filament\Schemas\Schema;
 
-class ProductInfolist
+class ProfitInfolist
 {
     public static function configure(Schema $schema): Schema
     {
