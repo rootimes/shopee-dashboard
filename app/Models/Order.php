@@ -16,7 +16,6 @@ class Order extends Model
         'status' => \App\Enums\OrderStatus::class,
         'shipping_option' => \App\Enums\OrderShipping::class,
         'payment_method' => \App\Enums\OrderPayment::class,
-        'note' => 'array',
         'ordered_at' => 'datetime',
         'buyer_payment_time' => 'datetime',
         'actual_shipment_time' => 'datetime',
