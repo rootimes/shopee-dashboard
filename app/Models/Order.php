@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Order extends Model
 {
@@ -21,6 +22,13 @@ class Order extends Model
         'actual_shipment_time' => 'datetime',
         'completed_time' => 'datetime',
     ];
+
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_profits', 'order_id', 'product_id')
+            ->using(ProductProfit::class)
+            ->withPivot(['display_name', 'sales_price', 'quantity',  'platform_fee', 'discount_amount', 'total_profit']);
+    }
 
     public function profits()
     {

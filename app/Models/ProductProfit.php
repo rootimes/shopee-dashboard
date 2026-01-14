@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ProductProfit extends Model
+class ProductProfit extends Pivot
 {
+    protected $table = 'product_profits';
+
     protected $guarded = [];
 
     protected $casts = [

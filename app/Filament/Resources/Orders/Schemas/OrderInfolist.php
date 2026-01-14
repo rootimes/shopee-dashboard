@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\Orders\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Infolists\Components\RepeatableEntry;
 
 class OrderInfolist
 {
@@ -176,6 +176,40 @@ class OrderInfolist
                         TextEntry::make('note')
                             ->label('備註')
                             ->placeholder('無'),
+                    ])
+                    ->columns(1),
+
+                Section::make('商品清單')
+                    ->schema([
+                        RepeatableEntry::make('products')
+                            ->schema([
+                                TextEntry::make('pivot.display_name')
+                                    ->label('商品名稱'),
+
+                                TextEntry::make('pivot.sales_price')
+                                    ->label('銷售價格')
+                                    ->money('TWD'),
+
+                                TextEntry::make('pivot.quantity')
+                                    ->label('數量'),
+
+                                TextEntry::make('pivot.total_sales_price')
+                                    ->label('總銷售價格')
+                                    ->money('TWD'),
+
+                                TextEntry::make('pivot.platform_fee')
+                                    ->label('平台手續費')
+                                    ->money('TWD'),
+
+                                TextEntry::make('pivot.discount_amount')
+                                    ->label('折扣金額')
+                                    ->money('TWD'),
+
+                                TextEntry::make('pivot.total_profit')
+                                    ->label('利潤')
+                                    ->money('TWD')
+                                    ->color(fn($state) => $state >= 0 ? 'success' : 'danger'),
+                            ])->columns(3)
                     ])
                     ->columns(1),
             ]);
