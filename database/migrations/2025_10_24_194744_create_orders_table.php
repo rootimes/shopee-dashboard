@@ -23,10 +23,10 @@ return new class extends Migration
             $table->unsignedInteger('buyer_total_payment')->nullable()->comment('買家總支付金額');
             $table->unsignedInteger('shopee_subsidy')->nullable()->comment('蝦皮補貼金額');
             $table->unsignedInteger('shopee_coin_deduction')->nullable()->comment('蝦幣折抵');
-            $table->unsignedInteger('credit_card_promotion_discount')->nullable()->comment('銀行信用卡活動折抵');
+            $table->unsignedInteger('credit_card_promotion_deduction')->nullable()->comment('銀行信用卡活動折抵');
             $table->unsignedInteger('shop_voucher_discount')->nullable()->comment('賣場優惠券');
             $table->unsignedInteger('shop_shopee_coin_return')->nullable()->comment('賣家蝦幣回饋券');
-            $table->unsignedInteger('voucher')->nullable()->comment('優惠券');
+            $table->unsignedInteger('shopee_voucher_discount')->nullable()->comment('優惠券');
             $table->unsignedInteger('transaction_fee')->nullable()->comment('成交手續費');
             $table->unsignedInteger('other_service_fee')->nullable()->comment('其他服務費');
             $table->unsignedInteger('payment_processing_fee')->nullable()->comment('金流與系統處理費');

@@ -19,7 +19,10 @@ return new class extends Migration
             $table->unsignedInteger('sales_price')->nullable()->comment('商品活動價格');
             $table->unsignedInteger('quantity')->nullable()->comment('數量');
             $table->decimal('platform_fee', 10, 2)->nullable()->comment('平台手續費');
-            $table->decimal('discount_amount', 10, 2)->nullable()->comment('折扣金額');
+            $table->decimal('shopee_deduction_amount', 10, 2)->nullable()->comment('蝦皮折抵金額');
+            $table->decimal('shop_discount_amount', 10, 2)->nullable()->comment('賣場折扣金額');
+            $table->decimal('shop_shopee_coin_return_amount', 10, 2)->nullable()->comment('賣場蝦幣回饋金額');
+            $table->decimal('shopee_discount_amount', 10, 2)->nullable()->comment('蝦皮折扣金額');
             $table->decimal('product_order_ratio', 10, 2)->nullable()->comment('商品訂單佔比');
             $table->decimal('cost_price', 10, 2)->nullable()->comment('商品成本價格');
             $table->decimal('total_profit', 10, 2)->nullable()->comment('總利潤');

@@ -34,6 +34,18 @@ class ProductProfit extends Pivot
         );
     }
 
+    public function totalRevenue(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): float => $this->total_sales_price
+                + $this->shopee_deduction_amount
+                - $this->platform_fee
+                - $this->shop_discount_amount
+                - $this->shop_shopee_coin_return_amount
+                - $this->shopee_discount_amount,
+        );
+    }
+
     public function orderTotalPrice(): Attribute
     {
         return Attribute::make(
@@ -65,7 +77,7 @@ class ProductProfit extends Pivot
     public function orderCreditCardPromotionDiscount(): Attribute
     {
         return Attribute::make(
-            get: fn (): float => $this->order->credit_card_promotion_discount ?? 0,
+            get: fn (): float => $this->order->credit_card_promotion_deduction ?? 0,
         );
     }
 
@@ -86,7 +98,7 @@ class ProductProfit extends Pivot
     public function orderVoucher(): Attribute
     {
         return Attribute::make(
-            get: fn (): float => $this->order->voucher ?? 0,
+            get: fn (): float => $this->order->shopee_voucher_discount ?? 0,
         );
     }
 

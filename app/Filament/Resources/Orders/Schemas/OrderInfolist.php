@@ -187,40 +187,47 @@ class OrderInfolist
                                 TextEntry::make('pivot.display_name')
                                     ->label('商品名稱'),
 
+                                TextEntry::make('pivot.quantity')
+                                    ->label('數量'),
+
                                 TextEntry::make('pivot.sales_price')
                                     ->label('銷售價格')
                                     ->money('TWD'),
 
-                                TextEntry::make('pivot.quantity')
-                                    ->label('數量'),
+                                TextEntry::make('pivot.cost_price')
+                                    ->label('成本價格')
+                                    ->money('TWD'),
 
-                                TextEntry::make('pivot.total_sales_price')
-                                    ->label('總銷售價格')
+                                TextEntry::make('pivot.total_revenue')
+                                    ->label('總營收')
+                                    ->helperText('已減去折扣與手續費')
                                     ->money('TWD'),
 
                                 TextEntry::make('pivot.platform_fee')
                                     ->label('平台手續費')
                                     ->money('TWD'),
 
-                                TextEntry::make('pivot.discount_amount')
-                                    ->label('折扣金額')
-                                    ->money('TWD'),
+                                TextEntry::make('pivot.product_order_ratio')
+                                    ->label('商品訂單佔比')
+                                    ->suffix('%')
+                                    ->formatStateUsing(fn (?float $state) => $state !== null ? $state * 100 : null),
 
                                 TextEntry::make('pivot.total_profit')
                                     ->label('利潤')
                                     ->money('TWD')
-                                    ->color(fn ($state) => $state >= 0 ? 'success' : 'danger'),
+                                    ->color(fn (?float $state) => $state >= 0 ? 'success' : 'danger'),
 
                                 TextEntry::make('pivot.id')
                                     ->label('商品利潤詳細')
+                                    ->state('前往')
                                     ->url(
                                         fn ($record) => $record->pivot?->id
                                             ? ProfitResource::getUrl('view', ['record' => $record->pivot->id])
                                             : null
                                     )
-                                    ->state('前往')
                                     ->color('info'),
-                            ])->columns(3),
+                            ])
+                            ->columns(3),
                     ])
                     ->columns(1),
             ]);

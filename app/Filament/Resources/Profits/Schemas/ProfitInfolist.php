@@ -82,8 +82,20 @@ class ProfitInfolist
                             ->label('總成本價格')
                             ->money('TWD'),
 
-                        TextEntry::make('discount_amount')
-                            ->label('折扣金額')
+                        TextEntry::make('shopee_deduction_amount')
+                            ->label('蝦皮折抵金額')
+                            ->money('TWD'),
+
+                        TextEntry::make('shop_discount_amount')
+                            ->label('賣場折扣金額')
+                            ->money('TWD'),
+
+                        TextEntry::make('shop_shopee_coin_return_amount')
+                            ->label('賣場蝦幣回饋金額')
+                            ->money('TWD'),
+
+                        TextEntry::make('shopee_discount_amount')
+                            ->label('蝦皮折扣金額')
                             ->money('TWD'),
 
                         TextEntry::make('product_order_ratio')
@@ -117,7 +129,7 @@ class ProfitInfolist
                             ->money('TWD')
                             ->placeholder('0'),
 
-                        TextEntry::make('order_credit_card_promotion_discount')
+                        TextEntry::make('order_credit_card_promotion_deduction')
                             ->label('銀行信用卡活動折抵')
                             ->money('TWD')
                             ->placeholder('0'),

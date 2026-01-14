@@ -10,7 +10,7 @@ use App\Models\Product;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Number;
 
 class OrderImporter extends Importer
@@ -36,11 +36,11 @@ class OrderImporter extends Importer
             ImportColumn::make('return_shipping_fee')->label('退貨運費')->requiredMapping()->guess(['退貨運費']),
             ImportColumn::make('buyer_total_payment')->label('買家總支付金額')->requiredMapping()->guess(['買家總支付金額']),
             ImportColumn::make('shopee_subsidy')->label('蝦皮補貼金額')->requiredMapping()->guess(['蝦皮補貼金額']),
-            ImportColumn::make('shopee_coin_deduction')->label('蝦皮幣抵扣')->requiredMapping()->guess(['蝦幣折抵']),
-            ImportColumn::make('credit_card_promotion_discount')->label('銀行信用卡活動折抵')->requiredMapping()->guess(['銀行信用卡活動折抵']),
+            ImportColumn::make('shopee_coin_deduction')->label('蝦幣折抵')->requiredMapping()->guess(['蝦幣折抵']),
+            ImportColumn::make('credit_card_promotion_deduction')->label('銀行信用卡活動折抵')->requiredMapping()->guess(['銀行信用卡活動折抵']),
             ImportColumn::make('shop_voucher_discount')->label('賣場優惠券')->requiredMapping()->guess(['賣場優惠券']),
             ImportColumn::make('shop_shopee_coin_return')->label('賣家蝦幣回饋券')->requiredMapping()->guess(['賣家蝦幣回饋券']),
-            ImportColumn::make('voucher')->label('優惠券')->requiredMapping()->guess(['優惠券']),
+            ImportColumn::make('shopee_voucher_discount')->label('優惠券')->requiredMapping()->guess(['優惠券']),
             ImportColumn::make('transaction_fee')->label('成交手續費')->requiredMapping()->guess(['成交手續費']),
             ImportColumn::make('other_service_fee')->label('其他服務費')->requiredMapping()->guess(['其他服務費']),
             ImportColumn::make('payment_processing_fee')->label('金流與系統處理費')->requiredMapping()->guess(['金流與系統處理費']),
@@ -72,9 +72,9 @@ class OrderImporter extends Importer
 
             // product info
 
-            ImportColumn::make('product_id')->label('商品選項貨號')->requiredMapping()->guess(['商品選項貨號'])->fillRecordUsing(fn() => []),
-            ImportColumn::make('quantity')->label('數量')->requiredMapping()->guess(['數量'])->fillRecordUsing(fn() => []),
-            ImportColumn::make('sales_price')->label('商品活動價格')->requiredMapping()->guess(['商品活動價格'])->fillRecordUsing(fn() => []),
+            ImportColumn::make('product_id')->label('商品選項貨號')->requiredMapping()->guess(['商品選項貨號'])->fillRecordUsing(fn () => []),
+            ImportColumn::make('quantity')->label('數量')->requiredMapping()->guess(['數量'])->fillRecordUsing(fn () => []),
+            ImportColumn::make('sales_price')->label('商品活動價格')->requiredMapping()->guess(['商品活動價格'])->fillRecordUsing(fn () => []),
         ];
     }
 
@@ -87,10 +87,10 @@ class OrderImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your order import has completed and ' . Number::format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your order import has completed and '.Number::format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.Number::format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         return $body;
@@ -103,40 +103,51 @@ class OrderImporter extends Importer
         $productId = $this->data['product_id'] ?? null;
 
         if ($this->shouldSkipRow($productId)) {
-            Notification::make()
-                ->title('Skipping order ID ' . $this->data['id'])
-                ->info()
-                ->send();
+            Log::info('Skipping order profit calculation', [
+                'order_id' => $this->data['id'],
+                'status' => $this->data['status']?->getLabel(),
+                'product_id' => $productId,
+            ]);
 
             return;
         }
 
-        $salesPrice = $this->data['sales_price'] ?? 0;
-
-        $quantity = $this->data['quantity'] ?? 0;
-
-        $totalPrice = $this->data['total_price'] ?? 0;
-
-        $productCostPrice = $product->cost_price ?? 0;
+        [
+            'totalPrice' => $totalPrice,
+            'salesPrice' => $salesPrice,
+            'quantity' => $quantity,
+            'productCostPrice' => $productCostPrice,
+        ] = $this->getProfitItems($product);
 
         $productTotalPrice = $this->calcProductTotalPrice($salesPrice, $quantity);
 
-        $discountBase = $this->calcDiscountBase();
+        $shopeeVoucherDiscount = $this->getField('shopee_voucher_discount');
+        $shopeeDeduction = $this->getField('shopee_coin_deduction')
+            + $this->getField('credit_card_promotion_deduction');
+        $shopVoucherDiscount = $this->getField('shop_voucher_discount');
+        $shopShopeeCoinReturn = $this->getField('shop_shopee_coin_return');
 
-        $feeBase = $this->calcFeeBase();
+        $discountBase = $shopVoucherDiscount + $shopeeVoucherDiscount + $shopeeDeduction;
 
-        $productOrderRate = $this->calcProductOrderRate(
+        $productOrderRatio = $this->calcProductOrderRatio(
             $productTotalPrice,
             $totalPrice,
             $discountBase,
         );
 
-        $platformFee = $feeBase * $productOrderRate;
-        $discountAmount = $discountBase * $productOrderRate;
+        $platformFee = $this->calcFee($productOrderRatio);
 
-        $totalProfit = ($salesPrice - $productCostPrice) * $quantity
-            - $platformFee
-            - $discountAmount;
+        $shopeeDiscountAmount = $shopeeVoucherDiscount * $productOrderRatio;
+        $shopeeDeductionAmount = $shopeeDeduction * $productOrderRatio;
+        $shopDiscountAmount = $shopVoucherDiscount * $productOrderRatio;
+        $shopShopeeCoinReturnAmount = $shopShopeeCoinReturn * $productOrderRatio;
+
+        $totalProfit =
+            ($salesPrice - $productCostPrice) * $quantity
+            + $shopeeDeductionAmount
+            - $shopShopeeCoinReturnAmount
+            - $shopDiscountAmount
+            - $platformFee;
 
         try {
             $this->record->profits()->updateOrCreate(
@@ -150,16 +161,22 @@ class OrderImporter extends Importer
                     'quantity' => $this->data['quantity'],
                     'order_completed_time' => $this->data['completed_time'],
                     'platform_fee' => $platformFee,
-                    'discount_amount' => $discountAmount,
+                    'shopee_deduction_amount' => $shopeeDeductionAmount,
+                    'shop_discount_amount' => $shopDiscountAmount,
+                    'shop_shopee_coin_return_amount' => $shopShopeeCoinReturnAmount,
+                    'shopee_discount_amount' => $shopeeDiscountAmount,
+                    'product_order_ratio' => $productOrderRatio,
                     'cost_price' => $productCostPrice,
                     'total_profit' => $totalProfit,
                 ],
             );
-        } catch (\Throwable $e) {
-            Notification::make()
-                ->title('Error saving product profit for order ID ' . $this->data['id'] . ': ' . $e->getMessage())
-                ->danger()
-                ->send();
+        } catch (\Exception $e) {
+            Log::error('Error saving product profit', [
+                'order_id' => $this->data['id'],
+                'product_id' => $productId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             throw $e;
         }
@@ -168,7 +185,7 @@ class OrderImporter extends Importer
     private function shouldSkipRow(?string $productId): bool
     {
         if (
-            $this->data['status'] !== OrderStatus::COMPLETED ||
+            $this->data['status'] !== OrderStatus::COMPLETED &&
             $this->data['status'] !== OrderStatus::REVIEW
         ) {
             return true;
@@ -181,34 +198,43 @@ class OrderImporter extends Importer
         return false;
     }
 
+    private function getProfitItems(Product $product): array
+    {
+        $totalPrice = $this->data['total_price'] ?? 0;
+        $salesPrice = $this->data['sales_price'] ?? 0;
+        $quantity = $this->data['quantity'] ?? 0;
+        $productCostPrice = $product->cost_price ?? 0;
+
+        return [
+            'totalPrice' => $totalPrice,
+            'salesPrice' => $salesPrice,
+            'quantity' => $quantity,
+            'productCostPrice' => $productCostPrice,
+        ];
+    }
+
     private function calcProductTotalPrice(float $salesPrice, int $quantity): float
     {
         return (float) ($salesPrice * $quantity);
     }
 
-    private function calcDiscountBase(): float
+    private function getField(string $field): float
     {
-        return (float) (
-            ($this->data['shopee_coin_deduction'] ?? 0)
-            + ($this->data['credit_card_promotion_discount'] ?? 0)
-            + ($this->data['shop_voucher_discount'] ?? 0)
-            + ($this->data['shop_shopee_coin_return'] ?? 0)
-            + ($this->data['voucher'] ?? 0)
-        );
+        return (float) ($this->data[$field] ?? 0);
     }
 
-    private function calcFeeBase(): float
+    private function calcFee(float $ratio): float
     {
         return (float) (
             ($this->data['transaction_fee'] ?? 0)
             + ($this->data['other_service_fee'] ?? 0)
             + ($this->data['payment_processing_fee'] ?? 0)
-        );
+        ) * $ratio;
     }
 
-    private function calcProductOrderRate(float $productTotalPrice, float $totalPrice, float $discountBase): float
+    private function calcProductOrderRatio(float $productTotalPrice, float $totalPrice, float $discount): float
     {
-        $denominator = $totalPrice + $discountBase;
+        $denominator = $totalPrice + $discount;
 
         return $denominator > 0
             ? $productTotalPrice / $denominator
