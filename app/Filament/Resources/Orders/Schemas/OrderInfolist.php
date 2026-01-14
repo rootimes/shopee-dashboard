@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
+use App\Filament\Resources\Profits\ProfitResource;
+use Dom\Text;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -209,6 +211,16 @@ class OrderInfolist
                                     ->label('利潤')
                                     ->money('TWD')
                                     ->color(fn($state) => $state >= 0 ? 'success' : 'danger'),
+
+                                TextEntry::make('pivot.id')
+                                    ->label('商品利潤詳細')
+                                    ->url(
+                                        fn($record) => $record->pivot?->id
+                                            ? ProfitResource::getUrl('view', ['record' => $record->pivot->id])
+                                            : null
+                                    )
+                                    ->state('前往查看')
+                                    ->color('info'),
                             ])->columns(3)
                     ])
                     ->columns(1),

@@ -27,7 +27,7 @@ class Order extends Model
     {
         return $this->belongsToMany(Product::class, 'product_profits', 'order_id', 'product_id')
             ->using(ProductProfit::class)
-            ->withPivot(['display_name', 'sales_price', 'quantity',  'platform_fee', 'discount_amount', 'total_profit']);
+            ->withPivot(['id', 'display_name', 'sales_price', 'quantity',  'platform_fee', 'discount_amount', 'total_profit']);
     }
 
     public function profits()

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Profits\Schemas;
 
-use Dom\Text;
+use App\Filament\Resources\Orders\OrderResource;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
@@ -11,15 +11,19 @@ class ProfitInfolist
 {
     public static function configure(Schema $schema): Schema
     {
+
         return $schema
             ->columns(1)
             ->components([
-
                 Section::make('訂單資訊')
                     ->schema([
                         TextEntry::make('order_id')
                             ->label('訂單編號')
-                            ->copyable(),
+                            ->url(fn($record) => $record->order
+                                ? OrderResource::getUrl('view', ['record' => $record->order_id])
+                                : null
+                            )
+                            ->color('info'),
 
                         TextEntry::make('order_completed_time')
                             ->label('訂單完成時間')
