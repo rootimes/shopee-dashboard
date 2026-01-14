@@ -9,6 +9,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 
 class ProfitsTable
 {
@@ -20,7 +22,7 @@ class ProfitsTable
                 TextColumn::make('display_name')->searchable()->label('商品名稱'),
                 TextColumn::make('sales_price')->label('銷售價格'),
                 TextColumn::make('quantity')->label('銷售數量'),
-                TextColumn::make('total_sales_price')->label('總銷售價格')->getStateUsing(fn ($record) => $record->sales_price * $record->quantity),
+                TextColumn::make('total_sales_price')->label('總銷售價格')->getStateUsing(fn($record) => $record->sales_price * $record->quantity),
                 TextColumn::make('platform_fee')->summarize(Sum::make()->label('總手續費'))->label('平台手續費'),
                 TextColumn::make('discount_amount')->sortable()->label('折扣金額'),
                 TextColumn::make('cost_price')->sortable()->label('商品成本價格'),
@@ -37,33 +39,50 @@ class ProfitsTable
 
                         DateTimePicker::make('until')
                             ->label('結束時間')
-                            ->seconds(false),
+                            ->seconds(false)
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
                                 filled($data['from'] ?? null),
-                                fn (Builder $query) => $query->where('order_completed_time', '>=', $data['from']),
+                                fn(Builder $query) => $query->where('order_completed_time', '>=', $data['from']),
                             )
                             ->when(
                                 filled($data['until'] ?? null),
-                                fn (Builder $query) => $query->where('order_completed_time', '<=', $data['until']),
+                                fn(Builder $query) => $query->where('order_completed_time', '<=', $data['until']),
                             );
                     })
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
 
                         if (filled($data['from'] ?? null)) {
-                            $indicators[] = '開始：'.$data['from'];
+                            $indicators[] = '開始：' . $data['from'];
                         }
 
                         if (filled($data['until'] ?? null)) {
-                            $indicators[] = '結束：'.$data['until'];
+                            $indicators[] = '結束：' . $data['until'];
                         }
 
                         return $indicators;
                     }),
-            ])
+                SelectFilter::make('total_profit')
+                    ->label('是否有利潤')
+                    ->options([
+                        'positive' => '有利潤',
+                        'negative' => '虧損',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!filled($data['value'] ?? null)) {
+                            return $query;
+                        }
+
+                        return $query->when(
+                            $data['value'] === 'positive',
+                            fn(Builder $query) => $query->where('total_profit', '>', 0),
+                            fn(Builder $query) => $query->where('total_profit', '<=', 0),
+                        );
+                    }),
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 ViewAction::make(),
             ])

@@ -24,6 +24,18 @@ enum OrderStatus: int
         };
     }
 
+    public static function options(): array
+    {
+        return [
+            self::PENDING->value => self::PENDING->label(),
+            self::TRANSIT->value => self::TRANSIT->label(),
+            self::DELIVERED->value => self::DELIVERED->label(),
+            self::REVIEW->value => self::REVIEW->label(),
+            self::COMPLETED->value => self::COMPLETED->label(),
+            self::CANCELED->value => self::CANCELED->label(),
+        ];
+    }
+
     public static function fromLabel(string $label): ?self
     {
         return match ($label) {

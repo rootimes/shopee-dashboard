@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\Orders\Tables;
 
+use App\Enums\OrderStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 
 class OrdersTable
 {
@@ -52,7 +55,12 @@ class OrdersTable
                 TextColumn::make('buyer_note')->label('買家備註')->searchable()->limit(50),
                 TextColumn::make('note')->label('備註')->searchable()->limit(50),
             ])
-            ->filters([])
+            ->filters([
+                SelectFilter::make('status')
+                    ->label('訂單狀態')
+                    ->multiple()
+                    ->options(fn () => OrderStatus::options()),
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 ViewAction::make(),
             ])
