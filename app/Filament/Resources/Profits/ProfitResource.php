@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Profits;
 
 use App\Filament\Resources\Profits\Pages\ListProfits;
 use App\Filament\Resources\Profits\Pages\ViewProfit;
-use App\Filament\Resources\Profits\RelationManagers\OrderRelationManager;
 use App\Filament\Resources\Profits\Schemas\ProfitInfolist;
 use App\Filament\Resources\Profits\Tables\ProfitsTable;
 use App\Models\ProductProfit;

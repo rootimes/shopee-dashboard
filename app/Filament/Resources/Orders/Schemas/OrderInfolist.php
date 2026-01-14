@@ -3,11 +3,10 @@
 namespace App\Filament\Resources\Orders\Schemas;
 
 use App\Filament\Resources\Profits\ProfitResource;
-use Dom\Text;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Infolists\Components\RepeatableEntry;
 
 class OrderInfolist
 {
@@ -24,7 +23,7 @@ class OrderInfolist
 
                         TextEntry::make('status')
                             ->label('訂單狀態')
-                            ->formatStateUsing(fn($state) => $state?->label() ?? '-'),
+                            ->formatStateUsing(fn ($state) => $state?->label() ?? '-'),
 
                         TextEntry::make('ordered_at')
                             ->label('訂單成立時間')
@@ -38,7 +37,7 @@ class OrderInfolist
                         TextEntry::make('failure_reason')
                             ->label('不成立原因')
                             ->placeholder('無')
-                            ->visible(fn($record) => filled($record->failure_reason)),
+                            ->visible(fn ($record) => filled($record->failure_reason)),
                     ])
                     ->columns(4),
 
@@ -130,7 +129,7 @@ class OrderInfolist
                     ->schema([
                         TextEntry::make('payment_method')
                             ->label('付款方式')
-                            ->formatStateUsing(fn($state) => $state?->label() ?? '-'),
+                            ->formatStateUsing(fn ($state) => $state?->label() ?? '-'),
 
                         TextEntry::make('installment_plan')
                             ->label('分期付款期數')
@@ -138,7 +137,7 @@ class OrderInfolist
 
                         TextEntry::make('shipping_option')
                             ->label('寄送方式')
-                            ->formatStateUsing(fn($state) => $state?->label() ?? '-'),
+                            ->formatStateUsing(fn ($state) => $state?->label() ?? '-'),
 
                         TextEntry::make('city')
                             ->label('城市')
@@ -210,18 +209,18 @@ class OrderInfolist
                                 TextEntry::make('pivot.total_profit')
                                     ->label('利潤')
                                     ->money('TWD')
-                                    ->color(fn($state) => $state >= 0 ? 'success' : 'danger'),
+                                    ->color(fn ($state) => $state >= 0 ? 'success' : 'danger'),
 
                                 TextEntry::make('pivot.id')
                                     ->label('商品利潤詳細')
                                     ->url(
-                                        fn($record) => $record->pivot?->id
+                                        fn ($record) => $record->pivot?->id
                                             ? ProfitResource::getUrl('view', ['record' => $record->pivot->id])
                                             : null
                                     )
-                                    ->state('前往查看')
+                                    ->state('前往')
                                     ->color('info'),
-                            ])->columns(3)
+                            ])->columns(3),
                     ])
                     ->columns(1),
             ]);

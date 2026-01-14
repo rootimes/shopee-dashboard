@@ -3,9 +3,10 @@
 namespace App\Filament\Resources\Profits\Schemas;
 
 use App\Filament\Resources\Orders\OrderResource;
+use App\Filament\Resources\Products\ProductResource;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class ProfitInfolist
 {
@@ -19,9 +20,10 @@ class ProfitInfolist
                     ->schema([
                         TextEntry::make('order_id')
                             ->label('訂單編號')
-                            ->url(fn($record) => $record->order
-                                ? OrderResource::getUrl('view', ['record' => $record->order_id])
-                                : null
+                            ->url(
+                                fn ($record) => $record->order
+                                    ? OrderResource::getUrl('view', ['record' => $record->order_id])
+                                    : null
                             )
                             ->color('info'),
 
@@ -51,9 +53,18 @@ class ProfitInfolist
                             ->label('利潤')
                             ->money('TWD')
                             ->color(
-                                fn($state) =>
-                                $state >= 0 ? 'success' : 'danger'
+                                fn ($state) => $state >= 0 ? 'success' : 'danger'
                             ),
+
+                        TextEntry::make('product_id')
+                            ->label('商品詳細')
+                            ->url(
+                                fn ($record) => $record->product_id
+                                    ? ProductResource::getUrl('edit', ['record' => $record->product_id])
+                                    : null
+                            )
+                            ->state('前往')
+                            ->color('info'),
                     ])
                     ->columns(3),
 
@@ -74,6 +85,11 @@ class ProfitInfolist
                         TextEntry::make('discount_amount')
                             ->label('折扣金額')
                             ->money('TWD'),
+
+                        TextEntry::make('sales_product_ratio')
+                            ->label('商品銷售佔比')
+                            ->suffix('%')
+                            ->formatStateUsing(fn ($state) => $state * 100),
                     ])
                     ->columns(3),
 
@@ -91,11 +107,6 @@ class ProfitInfolist
                             ->label('蝦皮補貼金額')
                             ->money('TWD')
                             ->placeholder('0'),
-
-                        TextEntry::make('sales_product_ratio')
-                            ->label('商品銷售佔比')
-                            ->suffix('%')
-                            ->formatStateUsing(fn($state) => $state * 100),
                     ])
                     ->columns(3),
 
