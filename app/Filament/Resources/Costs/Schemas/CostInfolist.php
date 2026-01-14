@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Costs\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class CostInfolist
@@ -12,16 +13,22 @@ class CostInfolist
         return $schema
             ->columns(1)
             ->components([
-                TextEntry::make('name')
-                    ->label('花費名稱'),
-                TextEntry::make('amount')
-                    ->label('金額')
-                    ->money('twd', true),
-                TextEntry::make('incurred_time')
-                    ->label('發生時間')
-                    ->date(),
-                TextEntry::make('description')
-                    ->label('描述'),
+                Section::make('訂單花費資訊')
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('花費名稱'),
+                        TextEntry::make('amount')
+                            ->label('金額')
+                            ->money('twd', true),
+                        TextEntry::make('incurred_time')
+                            ->label('發生時間')
+                            ->date(),
+                        TextEntry::make('description')
+                            ->label('描述')
+                            ->columnSpanFull()
+                            ->placeholder('無'),
+                    ])
+                    ->columns(3),
             ]);
     }
 }
