@@ -30,7 +30,7 @@ class ProductProfit extends Pivot
     public function totalCostPrice(): Attribute
     {
         return Attribute::make(
-            get: fn (): float => $this->cost_price * $this->quantity + $this->platform_fee,
+            get: fn (): float => $this->cost_price * $this->quantity,
         );
     }
 

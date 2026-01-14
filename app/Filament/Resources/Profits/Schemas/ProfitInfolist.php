@@ -68,18 +68,14 @@ class ProfitInfolist
                     ])
                     ->columns(3),
 
-                Section::make('成本與利潤')
+                Section::make('成本與手續費 - 依銷售金額佔比')
                     ->schema([
                         TextEntry::make('platform_fee')
-                            ->label('平台手續費')
-                            ->money('TWD'),
-
-                        TextEntry::make('cost_price')
-                            ->label('商品成本價格')
+                            ->label('平台手續費(-)')
                             ->money('TWD'),
 
                         TextEntry::make('total_cost_price')
-                            ->label('總成本價格')
+                            ->label('總成本價格(-)')
                             ->money('TWD'),
 
                         TextEntry::make('shopee_deduction_amount')
@@ -87,11 +83,11 @@ class ProfitInfolist
                             ->money('TWD'),
 
                         TextEntry::make('shop_discount_amount')
-                            ->label('賣場折扣金額')
+                            ->label('賣場折扣金額(-)')
                             ->money('TWD'),
 
                         TextEntry::make('shop_shopee_coin_return_amount')
-                            ->label('賣場蝦幣回饋金額')
+                            ->label('賣場蝦幣回饋金額(-)')
                             ->money('TWD'),
 
                         TextEntry::make('shopee_discount_amount')

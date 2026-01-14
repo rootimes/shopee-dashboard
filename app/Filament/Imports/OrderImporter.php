@@ -103,12 +103,6 @@ class OrderImporter extends Importer
         $productId = $this->data['product_id'] ?? null;
 
         if ($this->shouldSkipRow($productId)) {
-            Log::info('Skipping order profit calculation', [
-                'order_id' => $this->data['id'],
-                'status' => $this->data['status']?->getLabel(),
-                'product_id' => $productId,
-            ]);
-
             return;
         }
 
@@ -144,7 +138,6 @@ class OrderImporter extends Importer
 
         $totalProfit =
             ($salesPrice - $productCostPrice) * $quantity
-            + $shopeeDeductionAmount
             - $shopShopeeCoinReturnAmount
             - $shopDiscountAmount
             - $platformFee;
@@ -192,6 +185,12 @@ class OrderImporter extends Importer
         }
 
         if (is_null($productId)) {
+            Log::info('Skipping order profit calculation', [
+                'order_id' => $this->data['id'],
+                'status' => $this->data['status']?->label(),
+                'product_id' => $productId,
+            ]);
+
             return true;
         }
 
