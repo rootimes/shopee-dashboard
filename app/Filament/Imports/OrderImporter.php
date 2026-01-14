@@ -72,9 +72,9 @@ class OrderImporter extends Importer
 
             // product info
 
-            ImportColumn::make('product_id')->label('商品選項貨號')->requiredMapping()->guess(['商品選項貨號'])->fillRecordUsing(fn () => []),
-            ImportColumn::make('quantity')->label('數量')->requiredMapping()->guess(['數量'])->fillRecordUsing(fn () => []),
-            ImportColumn::make('sales_price')->label('商品活動價格')->requiredMapping()->guess(['商品活動價格'])->fillRecordUsing(fn () => []),
+            ImportColumn::make('product_id')->label('商品選項貨號')->requiredMapping()->guess(['商品選項貨號'])->fillRecordUsing(fn() => []),
+            ImportColumn::make('quantity')->label('數量')->requiredMapping()->guess(['數量'])->fillRecordUsing(fn() => []),
+            ImportColumn::make('sales_price')->label('商品活動價格')->requiredMapping()->guess(['商品活動價格'])->fillRecordUsing(fn() => []),
         ];
     }
 
@@ -87,10 +87,10 @@ class OrderImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your order import has completed and '.Number::format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
+        $body = 'Your order import has completed and ' . Number::format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' '.Number::format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
+            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
         }
 
         return $body;
@@ -98,32 +98,43 @@ class OrderImporter extends Importer
 
     protected function afterSave(): void
     {
-        if ($this->shouldSkipRow()) {
+        $product = Product::find($this->data['product_id']);
+
+        $productId = $this->data['product_id'] ?? null;
+
+        if ($this->shouldSkipRow($productId)) {
             Notification::make()
-                ->title('Skipping order ID '.$this->data['id'])
+                ->title('Skipping order ID ' . $this->data['id'])
                 ->info()
                 ->send();
 
             return;
         }
 
-        $product = Product::find($this->data['product_id']);
+        $salesPrice = $this->data['sales_price'] ?? 0;
 
-        $productOrderRate = $this->data['sales_price'] * $this->data['quantity'] / $this->data['total_price'];
+        $quantity = $this->data['quantity'] ?? 0;
 
-        $productCostPrice = $product ? $product->cost_price : 0;
+        $totalPrice = $this->data['total_price'] ?? 0;
 
-        $platformFee = ($this->data['transaction_fee']
-            + $this->data['other_service_fee']
-            + $this->data['payment_processing_fee']) * $productOrderRate;
+        $productCostPrice = $product->cost_price ?? 0;
 
-        $discountAmount = ($this->data['shopee_coin_deduction']
-            + $this->data['credit_card_promotion_discount']
-            + $this->data['shop_voucher_discount']
-            + $this->data['shop_shopee_coin_return']
-            + $this->data['voucher']) * $productOrderRate;
+        $productTotalPrice = $this->calcProductTotalPrice($salesPrice, $quantity);
 
-        $totalProfit = ($this->data['sales_price'] - $productCostPrice) * $this->data['quantity']
+        $discountBase = $this->calcDiscountBase();
+
+        $feeBase = $this->calcFeeBase();
+
+        $productOrderRate = $this->calcProductOrderRate(
+            $productTotalPrice,
+            $totalPrice,
+            $discountBase,
+        );
+
+        $platformFee = $feeBase * $productOrderRate;
+        $discountAmount = $discountBase * $productOrderRate;
+
+        $totalProfit = ($salesPrice - $productCostPrice) * $quantity
             - $platformFee
             - $discountAmount;
 
@@ -146,7 +157,7 @@ class OrderImporter extends Importer
             );
         } catch (\Throwable $e) {
             Notification::make()
-                ->title('Error saving product profit for order ID '.$this->data['id'].': '.$e->getMessage())
+                ->title('Error saving product profit for order ID ' . $this->data['id'] . ': ' . $e->getMessage())
                 ->danger()
                 ->send();
 
@@ -154,7 +165,7 @@ class OrderImporter extends Importer
         }
     }
 
-    private function shouldSkipRow(): bool
+    private function shouldSkipRow(?string $productId): bool
     {
         if (
             $this->data['status'] !== OrderStatus::COMPLETED ||
@@ -163,6 +174,44 @@ class OrderImporter extends Importer
             return true;
         }
 
+        if (is_null($productId)) {
+            return true;
+        }
+
         return false;
+    }
+
+    private function calcProductTotalPrice(float $salesPrice, int $quantity): float
+    {
+        return (float) ($salesPrice * $quantity);
+    }
+
+    private function calcDiscountBase(): float
+    {
+        return (float) (
+            ($this->data['shopee_coin_deduction'] ?? 0)
+            + ($this->data['credit_card_promotion_discount'] ?? 0)
+            + ($this->data['shop_voucher_discount'] ?? 0)
+            + ($this->data['shop_shopee_coin_return'] ?? 0)
+            + ($this->data['voucher'] ?? 0)
+        );
+    }
+
+    private function calcFeeBase(): float
+    {
+        return (float) (
+            ($this->data['transaction_fee'] ?? 0)
+            + ($this->data['other_service_fee'] ?? 0)
+            + ($this->data['payment_processing_fee'] ?? 0)
+        );
+    }
+
+    private function calcProductOrderRate(float $productTotalPrice, float $totalPrice, float $discountBase): float
+    {
+        $denominator = $totalPrice + $discountBase;
+
+        return $denominator > 0
+            ? $productTotalPrice / $denominator
+            : 0.0;
     }
 }
