@@ -86,8 +86,8 @@ class ProfitInfolist
                             ->label('折扣金額')
                             ->money('TWD'),
 
-                        TextEntry::make('sales_product_ratio')
-                            ->label('商品銷售佔比')
+                        TextEntry::make('product_order_ratio')
+                            ->label('商品訂單佔比')
                             ->suffix('%')
                             ->formatStateUsing(fn ($state) => $state * 100),
                     ])
@@ -113,7 +113,7 @@ class ProfitInfolist
                 Section::make('訂單折扣與優惠')
                     ->schema([
                         TextEntry::make('order_shopee_coin_deduction')
-                            ->label('蝦皮幣抵扣')
+                            ->label('蝦幣折抵')
                             ->money('TWD')
                             ->placeholder('0'),
 

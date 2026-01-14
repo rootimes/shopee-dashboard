@@ -29,7 +29,7 @@ class OrdersTable
                 TextColumn::make('return_shipping_fee')->label('退貨運費')->sortable()->money('TWD'),
                 TextColumn::make('buyer_total_payment')->label('買家總支付金額')->sortable()->money('TWD'),
                 TextColumn::make('shopee_subsidy')->label('蝦皮補貼金額')->sortable()->money('TWD'),
-                TextColumn::make('shopee_coin_deduction')->label('蝦皮幣抵扣')->sortable()->money('TWD'),
+                TextColumn::make('shopee_coin_deduction')->label('蝦幣折抵')->sortable()->money('TWD'),
                 TextColumn::make('credit_card_promotion_discount')->label('銀行信用卡活動折抵')->sortable()->money('TWD'),
                 TextColumn::make('shop_voucher_discount')->label('賣場優惠券')->sortable()->money('TWD'),
                 TextColumn::make('shop_shopee_coin_return')->label('賣家蝦幣回饋券')->sortable()->money('TWD'),

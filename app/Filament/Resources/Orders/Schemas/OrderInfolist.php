@@ -80,7 +80,7 @@ class OrderInfolist
                 Section::make('折扣與優惠')
                     ->schema([
                         TextEntry::make('shopee_coin_deduction')
-                            ->label('蝦皮幣抵扣')
+                            ->label('蝦幣折抵')
                             ->money('TWD')
                             ->placeholder('0'),
 

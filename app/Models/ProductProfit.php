@@ -55,15 +55,6 @@ class ProductProfit extends Pivot
         );
     }
 
-    public function salesProductRatio(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => $this->total_sales_price > 0
-                ? round(($this->sales_price * $this->quantity) / $this->order->total_price, 4)
-                : 0,
-        );
-    }
-
     public function orderShopeeCoinDeduction(): Attribute
     {
         return Attribute::make(

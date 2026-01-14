@@ -14,16 +14,17 @@ return new class extends Migration
         Schema::create('product_profits', function (Blueprint $table) {
             $table->id();
             $table->string('product_id')->index()->comment('商品編號');
-            $table->string('order_id')->comment('訂單編號');
+            $table->string('order_id')->index()->comment('訂單編號');
             $table->string('display_name')->nullable()->comment('商品顯示名稱');
             $table->unsignedInteger('sales_price')->nullable()->comment('商品活動價格');
             $table->unsignedInteger('quantity')->nullable()->comment('數量');
-            $table->decimal('cost_price', 10, 2)->nullable()->comment('商品成本價格');
             $table->decimal('platform_fee', 10, 2)->nullable()->comment('平台手續費');
             $table->decimal('discount_amount', 10, 2)->nullable()->comment('折扣金額');
-            $table->dateTime('order_completed_time')->nullable()->index()->comment('訂單完成時間');
+            $table->decimal('product_order_ratio', 10, 2)->nullable()->comment('商品訂單佔比');
+            $table->decimal('cost_price', 10, 2)->nullable()->comment('商品成本價格');
             $table->decimal('total_profit', 10, 2)->nullable()->comment('總利潤');
 
+            $table->dateTime('order_completed_time')->nullable()->index()->comment('訂單完成時間');
             $table->timestamps();
 
             $table->unique(['product_id', 'order_id']);
