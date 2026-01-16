@@ -1,4 +1,4 @@
-name: Deploy
+name: deploy
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
       - name: 檢出程式碼
         uses: actions/checkout@v4
 
-      - name: 設定環境變數 (.env)
+      - name: 設定環境變數
         run: |
           echo "${{ github.ref_name == 'main' && secrets.PROD_ENV || secrets.DEV_ENV }}" > .env
 
