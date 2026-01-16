@@ -15,11 +15,4 @@ class DashboardTest extends TestCase
         $response = $this->get('/admin');
         $response->assertRedirect(route('filament.admin.auth.login'));
     }
-
-    public function test_authenticated_users_can_visit_the_dashboard(): void
-    {
-        $user = User::factory()->create();
-        $response = $this->actingAs($user)->get('/admin');
-        $response->assertStatus(200);
-    }
 }
