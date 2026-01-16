@@ -26,7 +26,7 @@ jobs:
         run: |
           echo "${{ github.ref_name == 'main' && secrets.PROD_ENV || secrets.DEV_ENV }}" > .env
 
-      - name: 執行 Docker Compose 部屬
+      - name: 執行 Docker Compose 部署
         run: |
           echo "正在往 ${{ github.ref_name }} 伺服器部署..."
           docker compose up -d --build
