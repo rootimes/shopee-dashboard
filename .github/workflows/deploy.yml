@@ -1,0 +1,32 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  quality:
+    uses: ./.github/workflows/quality.yml
+    secrets: inherit
+
+  tests:
+    uses: ./.github/workflows/tests.yml
+    secrets: inherit
+
+  deploy:
+    needs: [quality, tests]
+    runs-on: ${{ github.ref_name == 'main' && 'self-hosted-prod' || 'self-hosted-dev' }}
+    steps:
+      - name: 檢出程式碼
+        uses: actions/checkout@v4
+
+      - name: 設定環境變數 (.env)
+        run: |
+          echo "${{ github.ref_name == 'main' && secrets.PROD_ENV || secrets.DEV_ENV }}" > .env
+
+      - name: 執行 Docker Compose 部署
+        run: |
+          echo "正在往 ${{ github.ref_name }} 伺服器部署..."
+          docker compose up -d --build
