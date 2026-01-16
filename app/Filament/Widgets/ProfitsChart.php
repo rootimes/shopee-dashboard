@@ -11,7 +11,7 @@ class ProfitsChart extends ChartWidget
 {
     protected ?string $heading = '每月利潤走勢';
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected function getData(): array
     {
@@ -33,9 +33,9 @@ class ProfitsChart extends ChartWidget
             ->dateColumn('incurred_time')
             ->sum('amount');
 
-        $labels = $profitsData->map(fn(TrendValue $value) => $value->date);
-        $profits = $profitsData->map(fn(TrendValue $value) => $value->aggregate);
-        $costs = $costsData->map(fn(TrendValue $value) => $value->aggregate);
+        $labels = $profitsData->map(fn (TrendValue $value) => $value->date);
+        $profits = $profitsData->map(fn (TrendValue $value) => $value->aggregate);
+        $costs = $costsData->map(fn (TrendValue $value) => $value->aggregate);
 
         $netProfits = $profits->map(function ($profit, $index) use ($costs) {
             return $profit - ($costs[$index] ?? 0);
