@@ -19,4 +19,14 @@ jobs:
     needs: [quality, tests]
     runs-on: ${{ github.ref_name == 'main' && 'self-hosted-prod' || 'self-hosted-dev' }}
     steps:
-      - run: echo "正在往 ${{ github.ref_name }} 伺服器部署..."
+      - name: 檢出程式碼
+        uses: actions/checkout@v4
+
+      - name: 設定環境變數 (.env)
+        run: |
+          echo "${{ github.ref_name == 'main' && secrets.PROD_ENV || secrets.DEV_ENV }}" > .env
+
+      - name: 執行 Docker Compose 部屬
+        run: |
+          echo "正在往 ${{ github.ref_name }} 伺服器部署..."
+          docker compose up -d --build
