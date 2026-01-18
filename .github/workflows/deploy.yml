@@ -24,7 +24,7 @@ jobs:
 
       - name: run docker compose
         run: |
-          echo "正在往 ${{ github.ref_name }} 伺服器部署..."
+          echo "deploying to development server..."
           docker compose up -d --build
 
   deploy-prod:
