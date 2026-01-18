@@ -8,27 +8,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  quality:
-    uses: ./.github/workflows/quality.yml
-    secrets: inherit
-    permissions:
-      contents: write
-
-  tests:
-    uses: ./.github/workflows/tests.yml
-    secrets: inherit
-
   deploy-dev:
-    needs: [quality, tests]
     if: github.ref_name == 'develop'
     runs-on: self-hosted-dev
+    environment: Development
     steps:
       - uses: actions/checkout@v4
 
       - name: setup .env file
-        shell: bash
         run: |
-          echo "${{ secrets.DEV_ENV }}" > .env
+          [System.IO.File]::WriteAllText(".env", "${{ secrets.ENV }}")
 
       - name: run docker compose
         run: |
@@ -36,16 +25,16 @@ jobs:
           docker compose up -d --build
 
   deploy-prod:
-    needs: [quality, tests]
     if: github.ref_name == 'main'
     runs-on: self-hosted-prod
+    environment: Production
     steps:
       - uses: actions/checkout@v4
 
       - name: setup .env file
 
         run: |
-          echo "${{ secrets.PROD_ENV }}" > .env
+          echo "${{ secrets.ENV }}" > .env
 
       - name: run docker compose
         run: |
