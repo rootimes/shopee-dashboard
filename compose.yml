@@ -6,8 +6,10 @@ services:
         container_name: shopee-dashboard
         restart: unless-stopped
         volumes:
-            - shopee:/var/www
+            - .:/var/www
             - ./docker/docker/php/php.ini:/usr/local/etc/php/conf.d/99-custom.ini
+            - shopee-modules:/var/www/modules
+            - shopee-vendor:/var/www/vendor
         networks:
             - shopee-network
 
@@ -18,7 +20,7 @@ services:
         ports:
             - "${FORWARD_APP_PORT}:80"
         volumes:
-            - shopee:/var/www
+            - .:/var/www
             - ./docker/nginx/conf.d/nginx.conf:/etc/nginx/conf.d/default.conf
         networks:
             - shopee-network
@@ -31,4 +33,7 @@ networks:
         driver: bridge
 
 volumes:
-    shopee:
+    shopee-modules:
+        driver: local
+    shopee-vendor:
+        driver: local
