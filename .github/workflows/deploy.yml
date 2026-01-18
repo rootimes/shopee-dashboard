@@ -16,8 +16,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: setup .env file
+        shell: powershell
+        env:
+          CONTENT: ${{ secrets.ENV }}
         run: |
-          [System.IO.File]::WriteAllText(".env", "${{ secrets.ENV }}")
+          [System.IO.File]::WriteAllText(".env", $Env:CONTENT)
 
       - name: run docker compose
         run: |
@@ -32,7 +35,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: setup .env file
-
+        shell: bash
         run: |
           echo "${{ secrets.ENV }}" > .env
 
