@@ -20,15 +20,32 @@ jobs:
     uses: ./.github/workflows/tests.yml
     secrets: inherit
 
-  deploy:
+  deploy-dev:
     needs: [quality, tests]
-    runs-on: ${{ github.ref_name == 'main' && 'self-hosted-prod' || 'self-hosted-dev' }}
+    if: github.ref_name == 'develop'
+    runs-on: self-hosted-dev
     steps:
       - uses: actions/checkout@v4
 
       - name: setup .env file
         run: |
-          echo "${{ github.ref_name == 'main' && secrets.PROD_ENV || secrets.DEV_ENV }}" > .env
+          echo "${{ secrets.DEV_ENV }}" > .env
+
+      - name: run docker compose
+        run: |
+          echo "正在往 ${{ github.ref_name }} 伺服器部署..."
+          docker compose up -d --build
+
+  deploy-prod:
+    needs: [quality, tests]
+    if: github.ref_name == 'main'
+    runs-on: self-hosted-prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup .env file
+        run: |
+          echo "${{ secrets.PROD_ENV }}" > .env
 
       - name: run docker compose
         run: |
