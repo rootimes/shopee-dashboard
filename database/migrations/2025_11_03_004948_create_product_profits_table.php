@@ -1,0 +1,45 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('product_profits', function (Blueprint $table) {
+            $table->id();
+            $table->string('product_id')->index()->comment('商品編號');
+            $table->string('order_id')->index()->comment('訂單編號');
+            $table->string('display_name')->nullable()->comment('商品顯示名稱');
+            $table->unsignedInteger('sales_price')->nullable()->comment('商品活動價格');
+            $table->unsignedInteger('quantity')->nullable()->comment('數量');
+            $table->decimal('platform_fee', 10, 2)->nullable()->comment('平台手續費');
+            $table->decimal('shopee_deduction_amount', 10, 2)->nullable()->comment('蝦皮折抵金額');
+            $table->decimal('shop_discount_amount', 10, 2)->nullable()->comment('賣場折扣金額');
+            $table->decimal('shop_shopee_coin_return_amount', 10, 2)->nullable()->comment('賣場蝦幣回饋金額');
+            $table->decimal('shopee_discount_amount', 10, 2)->nullable()->comment('蝦皮折扣金額');
+            $table->decimal('product_order_ratio', 10, 2)->nullable()->comment('商品訂單佔比');
+            $table->decimal('cost_price', 10, 2)->nullable()->comment('商品成本價格');
+            $table->decimal('total_profit', 10, 2)->nullable()->comment('總利潤');
+
+            $table->dateTime('order_completed_time')->nullable()->index()->comment('訂單完成時間');
+            $table->timestamps();
+
+            $table->unique(['product_id', 'order_id']);
+            $table->foreign('order_id')->references('id')->on('orders')->cascadeOnDelete();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('product_profits');
+    }
+};

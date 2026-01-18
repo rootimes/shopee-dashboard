@@ -1,0 +1,47 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  deploy-dev:
+    if: github.ref_name == 'develop'
+    runs-on: self-hosted-dev
+    environment: Development
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup .env file
+        shell: powershell
+        env:
+          CONTENT: ${{ secrets.ENV }}
+        run: |
+          [System.IO.File]::WriteAllText(".env", $Env:CONTENT)
+
+      - name: run docker compose
+        run: |
+          echo "deploying to development server..."
+          docker compose up -d --build
+
+  deploy-prod:
+    if: github.ref_name == 'main'
+    runs-on: self-hosted-prod
+    environment: Production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup .env file
+        shell: bash
+        env:
+          CONTENT: ${{ secrets.ENV }}
+        run: |
+          echo "${CONTENT}" > .env
+
+      - name: run docker compose
+        run: |
+          echo "deploying to production server..."
+          docker compose up -d --build
