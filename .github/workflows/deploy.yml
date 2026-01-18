@@ -9,7 +9,7 @@ on:
 
 jobs:
   deploy-dev:
-    # if: github.ref_name == 'develop'
+    if: github.ref_name == 'develop'
     runs-on: self-hosted-dev
     environment: Development
     steps:
@@ -36,10 +36,12 @@ jobs:
 
       - name: setup .env file
         shell: bash
+        env:
+          CONTENT: ${{ secrets.ENV }}
         run: |
-          echo "${{ secrets.ENV }}" > .env
+          echo "${CONTENT}" > .env
 
       - name: run docker compose
         run: |
-          echo "正在往 ${{ github.ref_name }} 伺服器部署..."
+          echo "deploying to production server..."
           docker compose up -d --build
