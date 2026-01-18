@@ -5,9 +5,7 @@ on:
     branches:
       - main
       - develop
-  pull_request:
-    branches:
-      - develop
+  workflow_dispatch:
 
 jobs:
   quality:
@@ -22,11 +20,13 @@ jobs:
 
   deploy-dev:
     needs: [quality, tests]
+    if: github.ref_name == 'develop'
     runs-on: self-hosted-dev
     steps:
       - uses: actions/checkout@v4
 
       - name: setup .env file
+        shell: bash
         run: |
           echo "${{ secrets.DEV_ENV }}" > .env
 
@@ -43,6 +43,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: setup .env file
+
         run: |
           echo "${{ secrets.PROD_ENV }}" > .env
 
