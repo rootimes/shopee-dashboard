@@ -3,6 +3,7 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
+        image: shopee-app
         restart: unless-stopped
         volumes:
             - .:/var/www
@@ -14,6 +15,18 @@ services:
                 aliases:
                     - shopee-dashboard
             database:
+
+    worker:
+        image: shopee-app
+        restart: unless-stopped
+        command: php /var/www/artisan queue:work --sleep=3 --tries=3
+        volumes:
+            - .:/var/www
+        networks:
+            shopee-network:
+            database:
+        depends_on:
+            - app
 
     nginx:
         build:
