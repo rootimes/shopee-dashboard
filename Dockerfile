@@ -1,8 +1,15 @@
+FROM composer:latest AS composer_builder
+WORKDIR /app
+COPY . .
+
+RUN composer install --no-dev --no-interaction --prefer-dist --ignore-platform-reqs
+
 FROM node:22 AS node_builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+COPY --from=composer_builder /app/vendor ./vendor
 RUN npm run build
 
 FROM php:8.4-fpm-alpine
@@ -20,6 +27,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY . /var/www
+
+COPY --from=composer_builder /app/vendor /var/www/vendor
 
 COPY --from=node_builder /app/public/build /var/www/public/build
 

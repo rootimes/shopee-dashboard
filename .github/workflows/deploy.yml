@@ -8,46 +8,40 @@ on:
   workflow_dispatch:
 
 jobs:
-  quality:
-    uses: ./.github/workflows/quality.yml
-    secrets: inherit
-    permissions:
-      contents: write
-
-  tests:
-    uses: ./.github/workflows/tests.yml
-    secrets: inherit
-
   deploy-dev:
-    needs: [quality, tests]
     if: github.ref_name == 'develop'
     runs-on: self-hosted-dev
+    environment: Development
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup .env file
+        shell: powershell
+        env:
+          CONTENT: ${{ secrets.ENV }}
+        run: |
+          [System.IO.File]::WriteAllText(".env", $Env:CONTENT)
+
+      - name: run docker compose
+        run: |
+          echo "deploying to development server..."
+          docker compose up -d --build
+
+  deploy-prod:
+    if: github.ref_name == 'main'
+    runs-on: self-hosted-prod
+    environment: Production
     steps:
       - uses: actions/checkout@v4
 
       - name: setup .env file
         shell: bash
+        env:
+          CONTENT: ${{ secrets.ENV }}
         run: |
-          echo "${{ secrets.DEV_ENV }}" > .env
+          echo "${CONTENT}" > .env
 
       - name: run docker compose
         run: |
-          echo "正在往 ${{ github.ref_name }} 伺服器部署..."
-          docker compose up -d --build
-
-  deploy-prod:
-    needs: [quality, tests]
-    if: github.ref_name == 'main'
-    runs-on: self-hosted-prod
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: setup .env file
-
-        run: |
-          echo "${{ secrets.PROD_ENV }}" > .env
-
-      - name: run docker compose
-        run: |
-          echo "正在往 ${{ github.ref_name }} 伺服器部署..."
+          echo "deploying to production server..."
           docker compose up -d --build
