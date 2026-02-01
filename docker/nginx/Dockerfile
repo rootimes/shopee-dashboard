@@ -2,11 +2,7 @@ FROM nginx:1.29.4-alpine
 
 WORKDIR /var/www
 
-RUN set -x \
-    && addgroup -g 82 -S www-data \
-    && adduser -u 82 -D -S -G www-data www-data
-
-RUN sed -i 's/user  nginx;/user  www-data;/g' /etc/nginx/nginx.conf
+COPY --from=shopee-app /var/www /var/www
 
 EXPOSE 80
 
