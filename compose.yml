@@ -57,9 +57,10 @@ networks:
     driver: bridge
   proxy:
     name: proxy_manager
-    # external: true
+    external: true
   database:
-    # external: true
+    name: database
+    external: true
 
 volumes:
   shopee-storage:
