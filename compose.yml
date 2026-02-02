@@ -1,39 +1,67 @@
 services:
-    app:
-        build:
-            context: .
-            dockerfile: Dockerfile
-        container_name: shopee-dashboard
-        restart: unless-stopped
-        volumes:
-            - .:/var/www
-            - ./docker/docker/php/php.ini:/usr/local/etc/php/conf.d/99-custom.ini
-            - shopee-modules:/var/www/modules
-            - shopee-vendor:/var/www/vendor
-        networks:
-            - shopee-network
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shopee-app
+    restart: unless-stopped
+    volumes:
+      - shopee-storage:/var/www/storage
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/99-custom.ini
+    networks:
+      shopee-network:
+        aliases:
+          - shopee-dashboard
+      database:
+    env_file:
+      - .env
 
-    nginx:
-        image: nginx:alpine
-        container_name: shopee-nginx
-        restart: unless-stopped
-        ports:
-            - "${FORWARD_APP_PORT}:80"
-        volumes:
-            - .:/var/www
-            - ./docker/nginx/conf.d/nginx.conf:/etc/nginx/conf.d/default.conf
-        networks:
-            - shopee-network
-        depends_on:
-            - app
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shopee-app
+    restart: unless-stopped
+    command: php /var/www/artisan queue:work --sleep=3 --tries=3
+    volumes:
+      - shopee-storage:/var/www/storage
+    networks:
+      shopee-network:
+      database:
+    depends_on:
+      - app
+    env_file:
+      - .env
 
+  nginx:
+    build:
+      context: docker/nginx
+      dockerfile: Dockerfile
+    image: nginx:1.29.4-alpine
+    restart: unless-stopped
+    ports:
+      - "${FORWARD_APP_PORT}:80"
+    volumes:
+      - shopee-storage:/var/www/storage
+      - ./docker/nginx/conf.d/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      shopee-network:
+      proxy:
+        aliases:
+          - shopee-nginx
+    depends_on:
+      - app
 
 networks:
-    shopee-network:
-        driver: bridge
+  shopee-network:
+    driver: bridge
+  proxy:
+    name: proxy_manager
+    external: true
+  database:
+    name: database
+    external: true
 
 volumes:
-    shopee-modules:
-        driver: local
-    shopee-vendor:
-        driver: local
+  shopee-storage:
+    driver: local

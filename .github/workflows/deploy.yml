@@ -25,6 +25,10 @@ jobs:
       - name: run docker compose
         run: |
           echo "deploying to development server..."
+          echo "Building application core..."
+          docker compose build app
+
+          echo "Starting application services..."
           docker compose up -d --build
 
   deploy-prod:
@@ -44,4 +48,8 @@ jobs:
       - name: run docker compose
         run: |
           echo "deploying to production server..."
+          echo "Building application core..."
+          docker compose build app
+
+          echo "Starting application services..."
           docker compose up -d --build
