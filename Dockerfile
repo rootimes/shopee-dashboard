@@ -2,10 +2,13 @@ FROM composer:2.9.3 AS composer_builder
 WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install \
-    --no-dev --no-interaction --no-scripts\
-    --prefer-dist --ignore-platform-reqs
+    --no-dev \
+    --no-interaction \
+    --no-scripts \
+    --ignore-platform-reqs \
+    --prefer-dist
 COPY . .
-RUN composer dump-autoload --optimize --no-scripts
+RUN composer dump-autoload --optimize
 
 FROM node:22 AS node_builder
 WORKDIR /app
@@ -29,14 +32,11 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl opcache
 
 COPY . .
-
 COPY --from=composer_builder /app/vendor ./vendor
 COPY --from=node_builder /app/public/build ./public/build
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-RUN chmod +x /usr/local/bin/entrypoint.sh \
-    && chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 
