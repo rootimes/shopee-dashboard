@@ -17,8 +17,8 @@ class ProfitsChart extends ChartWidget
     {
         $profitsData = Trend::model(ProductProfit::class)
             ->between(
-                start: now()->subMonths(6),
-                end: now(),
+                start: now()->subMonths(6)->startOfMonth(),
+                end: now()->endOfMonth(),
             )
             ->perMonth()
             ->dateColumn('order_completed_time')
@@ -26,8 +26,8 @@ class ProfitsChart extends ChartWidget
 
         $costsData = Trend::model(\App\Models\Cost::class)
             ->between(
-                start: now()->subMonths(6),
-                end: now(),
+                start: now()->subMonths(6)->startOfMonth(),
+                end: now()->endOfMonth(),
             )
             ->perMonth()
             ->dateColumn('incurred_time')
