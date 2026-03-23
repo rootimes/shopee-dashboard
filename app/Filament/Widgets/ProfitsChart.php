@@ -2,10 +2,9 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Cost;
 use App\Models\ProductProfit;
 use Filament\Widgets\ChartWidget;
-use Flowframe\Trend\Trend;
-use Flowframe\Trend\TrendValue;
 
 class ProfitsChart extends ChartWidget
 {
@@ -15,31 +14,54 @@ class ProfitsChart extends ChartWidget
 
     protected function getData(): array
     {
-        $profitsData = Trend::model(ProductProfit::class)
-            ->between(
-                start: now()->subMonths(6)->startOfMonth(),
-                end: now()->endOfMonth(),
-            )
-            ->perMonth()
-            ->dateColumn('order_completed_time')
-            ->sum('total_profit');
+        $start = now()->subMonths(6)->startOfMonth();
+        $end = now()->endOfMonth();
 
-        $costsData = Trend::model(\App\Models\Cost::class)
-            ->between(
-                start: now()->subMonths(6)->startOfMonth(),
-                end: now()->endOfMonth(),
-            )
-            ->perMonth()
-            ->dateColumn('incurred_time')
-            ->sum('amount');
+        $period = new \DatePeriod(
+            $start,
+            new \DateInterval('P1M'),
+            $end->copy()->addDay()
+        );
 
-        $labels = $profitsData->map(fn (TrendValue $value) => $value->date);
-        $profits = $profitsData->map(fn (TrendValue $value) => $value->aggregate);
-        $costs = $costsData->map(fn (TrendValue $value) => $value->aggregate);
+        $months = [];
+        foreach ($period as $date) {
+            $months[$date->format('Y-m')] = [
+                'profits' => 0,
+                'costs' => 0,
+            ];
+        }
 
-        $netProfits = $profits->map(function ($profit, $index) use ($costs) {
-            return $profit - ($costs[$index] ?? 0);
-        });
+        $profitsData = ProductProfit::query()
+            ->selectRaw("DATE_FORMAT(order_completed_time, '%Y-%m') as month, SUM(total_profit) as aggregate")
+            ->whereBetween('order_completed_time', [$start, $end])
+            ->groupBy('month')
+            ->get();
+
+        foreach ($profitsData as $data) {
+            if (isset($months[$data->month])) {
+                $months[$data->month]['profits'] = (float) $data->aggregate;
+            }
+        }
+
+        $costsData = Cost::query()
+            ->selectRaw("DATE_FORMAT(incurred_time, '%Y-%m') as month, SUM(amount) as aggregate")
+            ->whereBetween('incurred_time', [$start, $end])
+            ->groupBy('month')
+            ->get();
+
+        foreach ($costsData as $data) {
+            if (isset($months[$data->month])) {
+                $months[$data->month]['costs'] = (float) $data->aggregate;
+            }
+        }
+
+        $labels = array_keys($months);
+        $profits = array_column($months, 'profits');
+        $costs = array_column($months, 'costs');
+
+        $netProfits = array_map(function ($profit, $cost) {
+            return $profit - $cost;
+        }, $profits, $costs);
 
         return [
             'datasets' => [

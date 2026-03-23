@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
+#[Guarded([])]
 class Product extends Model
 {
     public $incrementing = false;
 
     protected $keyType = 'string';
-
-    protected $guarded = [];
 
     protected function displayName(): Attribute
     {

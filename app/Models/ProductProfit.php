@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
+#[Guarded([])]
 class ProductProfit extends Pivot
 {
     protected $table = 'product_profits';
-
-    protected $guarded = [];
 
     protected $casts = [
         'order_completed_time' => 'datetime',
