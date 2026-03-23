@@ -16,4 +16,9 @@ if [ "$(id -u)" = "0" ]; then
     find storage bootstrap/cache -type f -exec chmod 0664 {} \;
 fi
 
+if [ "${APP_ENV:-production}" = "production" ]; then
+    php artisan optimize
+    php artisan filament:optimize
+fi
+
 exec "$@"
