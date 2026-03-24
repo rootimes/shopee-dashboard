@@ -1,0 +1,58 @@
+name: cloud
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: "read"
+  id-token: "write"
+
+jobs:
+  build-and-push:
+    runs-on: ${{ github.ref_name == 'main' && 'ubuntu-latest' || 'self-hosted-dev' }}
+    env:
+      GAR_LOCATION: asia-east1
+      PROJECT_ID: project-4b382091-2de2-4bd9-ad2
+      REPOSITORY: shopee-dashboard
+      IMAGE_NAME: app
+      IMAGE_TAG: ${{ github.ref_name }}-${{ github.sha }}
+      FULL_IMAGE_PATH: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v3"
+        with:
+          workload_identity_provider: "projects/1586803717/locations/global/workloadIdentityPools/develop/providers/github-ci"
+          service_account: "github@project-4b382091-2de2-4bd9-ad2.iam.gserviceaccount.com"
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v3"
+
+      - name: "Docker Auth"
+        run: |
+          gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
+
+      - name: "Build and Push Image"
+        run: |
+          docker build -t "${FULL_IMAGE_PATH}:${{ env.IMAGE_TAG }}" .
+          docker push "${FULL_IMAGE_PATH}:${{ env.IMAGE_TAG }}"
+
+          docker tag "${FULL_IMAGE_PATH}:${{ env.IMAGE_TAG }}" "${FULL_IMAGE_PATH}:${{ github.ref_name }}"
+          docker push "${FULL_IMAGE_PATH}:${{ github.ref_name }}"
+
+      - name: "Google Cloud Run Deploy"
+        run: |
+          gcloud run deploy shopee-dashboard \
+            --image="${{ env.FULL_IMAGE_PATH }}:${{ env.IMAGE_TAG }}" \
+            --region=${{ env.GAR_LOCATION }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --quiet
