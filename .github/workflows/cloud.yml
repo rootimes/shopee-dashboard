@@ -1,5 +1,4 @@
 name: cloud
-
 on:
   pull_request:
     branches:
@@ -12,27 +11,30 @@ permissions:
   id-token: "write"
 
 env:
-  GAR_LOCATION: asia-east1
-  PROJECT_ID: project-4b382091-2de2-4bd9-ad2
-  REPOSITORY: shopee-dashboard
-  IMAGE_NAME: app
-  IMAGE_TAG: ${{ github.ref_name }}-${{ github.sha }}
-  GAR_BASE: asia-east1-docker.pkg.dev/project-4b382091-2de2-4bd9-ad2/shopee-dashboard/app
+  GAR_LOCATION: "asia-east1"
+  PROJECT_ID: "project-4b382091-2de2-4bd9-ad2"
+  REPOSITORY: "shopee-dashboard"
+  IMAGE_NAME: "app"
+  GAR_BASE: "asia-east1-docker.pkg.dev/project-4b382091-2de2-4bd9-ad2/shopee-dashboard/app"
+  WIF_PROVIDER: "projects/1586803717/locations/global/workloadIdentityPools/develop/providers/github-ci"
+  SA_EMAIL: "github@project-4b382091-2de2-4bd9-ad2.iam.gserviceaccount.com"
+  SERVICE_NAME: "shopee-dashboard"
 
 jobs:
-  deploy-cloud:
-    runs-on: ${{ github.ref_name == 'main' && 'ubuntu-latest' || 'self-hosted-dev' }}
-
+  deploy-dev:
+    if: github.ref_name != 'main'
+    runs-on: self-hosted-dev
+    environment: Development
     steps:
-      - name: "Checkout"
+      - name: "Checkout Code"
         uses: "actions/checkout@v4"
 
       - id: "auth"
         name: "Authenticate to Google Cloud"
         uses: "google-github-actions/auth@v3"
         with:
-          workload_identity_provider: "projects/1586803717/locations/global/workloadIdentityPools/develop/providers/github-ci"
-          service_account: "github@project-4b382091-2de2-4bd9-ad2.iam.gserviceaccount.com"
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.SA_EMAIL }}
 
       - name: "Set up Cloud SDK"
         uses: "google-github-actions/setup-gcloud@v3"
@@ -40,28 +42,77 @@ jobs:
           skip_install: true
 
       - name: "Docker Auth"
+        shell: powershell
+        run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
+
+      - name: "Build and Push Image"
+        shell: powershell
         run: |
-          gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
+          $RAW_TAG = "${{ github.ref_name }}-${{ github.sha }}"
+          $SAFE_TAG = $RAW_TAG.Replace("/", "-")
+          $FULL_PATH = "${{ env.GAR_BASE }}".ToLower()
+
+          docker build -t "${FULL_PATH}:${SAFE_TAG}" .
+          docker push "${FULL_PATH}:${SAFE_TAG}"
+
+          $SAFE_REF = "${{ github.ref_name }}".Replace("/", "-")
+          docker tag "${FULL_PATH}:${SAFE_TAG}" "${FULL_PATH}:${SAFE_REF}"
+          docker push "${FULL_PATH}:${SAFE_REF}"
+
+          Add-Content -Path $env:GITHUB_ENV -Value "FINAL_IMAGE=${FULL_PATH}:${SAFE_TAG}"
+
+      - name: "Deploy to Cloud Run"
+        uses: "google-github-actions/deploy-cloudrun@v3"
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          image: ${{ env.FINAL_IMAGE }}
+          region: ${{ env.GAR_LOCATION }}
+          flags: "--allow-unauthenticated"
+
+  deploy-prod:
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - name: "Checkout Code"
+        uses: "actions/checkout@v4"
+
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v3"
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.SA_EMAIL }}
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v3"
+        with:
+          skip_install: true
+
+      - name: "Docker Auth"
+        shell: bash
+        run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
 
       - name: "Build and Push Image"
         shell: bash
         run: |
-          TAG="${{ github.ref_name }}-${{ github.sha }}"
-          FULL_PATH="${{ env.GAR_BASE }}"
+          RAW_TAG="${{ github.ref_name }}-${{ github.sha }}"
+          SAFE_TAG=$(echo "${RAW_TAG}" | sed 's/\//-/g')
+          FULL_PATH=$(echo "${{ env.GAR_BASE }}" | tr '[:upper:]' '[:lower:]')
 
-          docker build -t "$FULL_PATH:$TAG" .
-          docker push "$FULL_PATH:$TAG"
+          docker build -t "$FULL_PATH:$SAFE_TAG" .
+          docker push "$FULL_PATH:$SAFE_TAG"
 
-          docker tag "$FULL_PATH:$TAG" "$FULL_PATH:${{ github.ref_name }}"
-          docker push "$FULL_PATH:${{ github.ref_name }}"
+          SAFE_REF=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+          docker tag "$FULL_PATH:$SAFE_TAG" "$FULL_PATH:$SAFE_REF"
+          docker push "$FULL_PATH:$SAFE_REF"
 
-          echo "FINAL_IMAGE=${FULL_PATH}:${TAG}" >> "$GITHUB_ENV"
+          echo "FINAL_IMAGE=$FULL_PATH:$SAFE_TAG" >> "$GITHUB_ENV"
 
-      - name: "Google Cloud Run Deploy"
-        run: |
-          gcloud run deploy shopee-dashboard \
-            --image="${{ env.FINAL_IMAGE }}" \
-            --region=${{ env.GAR_LOCATION }} \
-            --platform=managed \
-            --allow-unauthenticated \
-            --quiet
+      - name: "Deploy to Cloud Run"
+        uses: "google-github-actions/deploy-cloudrun@v3"
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          image: ${{ env.FINAL_IMAGE }}
+          region: ${{ env.GAR_LOCATION }}
+          flags: "--allow-unauthenticated"
