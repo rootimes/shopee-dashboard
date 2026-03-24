@@ -62,12 +62,15 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "FINAL_IMAGE=${FULL_PATH}:${SAFE_TAG}"
 
       - name: "Deploy to Cloud Run"
-        uses: "google-github-actions/deploy-cloudrun@v3"
-        with:
-          service: ${{ env.SERVICE_NAME }}
-          image: ${{ env.FINAL_IMAGE }}
-          region: ${{ env.GAR_LOCATION }}
-          flags: "--allow-unauthenticated"
+        shell: powershell
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} `
+            --image="${{ env.FINAL_IMAGE }}" `
+            --region=${{ env.GAR_LOCATION }} `
+            --platform=managed `
+            --allow-unauthenticated `
+            --service-account="${{ env.SA_EMAIL }}" `
+            --quiet
 
   deploy-prod:
     if: github.ref_name == 'main'
