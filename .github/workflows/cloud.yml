@@ -11,15 +11,17 @@ permissions:
   contents: "read"
   id-token: "write"
 
+env:
+  GAR_LOCATION: asia-east1
+  PROJECT_ID: project-4b382091-2de2-4bd9-ad2
+  REPOSITORY: shopee-dashboard
+  IMAGE_NAME: app
+  IMAGE_TAG: ${{ github.ref_name }}-${{ github.sha }}
+
 jobs:
   build-and-push:
     runs-on: ${{ github.ref_name == 'main' && 'ubuntu-latest' || 'self-hosted-dev' }}
     env:
-      GAR_LOCATION: asia-east1
-      PROJECT_ID: project-4b382091-2de2-4bd9-ad2
-      REPOSITORY: shopee-dashboard
-      IMAGE_NAME: app
-      IMAGE_TAG: ${{ github.ref_name }}-${{ github.sha }}
       FULL_IMAGE_PATH: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
     steps:
