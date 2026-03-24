@@ -2,21 +2,24 @@
 
 namespace App\Models;
 
+use App\Enums\OrderPayment;
+use App\Enums\OrderShipping;
+use App\Enums\OrderStatus;
+use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+#[Guarded([])]
 class Order extends Model
 {
     public $incrementing = false;
 
     protected $keyType = 'string';
 
-    protected $guarded = [];
-
     protected $casts = [
-        'status' => \App\Enums\OrderStatus::class,
-        'shipping_option' => \App\Enums\OrderShipping::class,
-        'payment_method' => \App\Enums\OrderPayment::class,
+        'status' => OrderStatus::class,
+        'shipping_option' => OrderShipping::class,
+        'payment_method' => OrderPayment::class,
         'ordered_at' => 'datetime',
         'buyer_payment_time' => 'datetime',
         'actual_shipment_time' => 'datetime',
