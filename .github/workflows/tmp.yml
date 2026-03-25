@@ -1,0 +1,13 @@
+name: tmp
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  check:
+    runs-on: self-hosted-dev
+    steps:
+      - name: "測試 envsubst"
+        shell: bash
+        run: envsubst --version
